@@ -78,6 +78,14 @@
                         </li>
                     </ul>
                 </li>
+                <!-- New Section for Database Reset -->
+                <li class="nav-small-cap" th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}">--- System Operations</li>
+                <li th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}">
+                    <a class="waves-effect waves-dark" th:href="${home + 'manager/reset/database'}">
+                        <i class="fas fa-trash-restore"></i>
+                        <span class="hide-menu">Reset Database</span>
+                    </a>
+                </li>
                 <li th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}" class="nav-small-cap">--- CSV data import</li>
                 <li>
                     <a th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}" class="has-arrow waves-effect waves-dark" href="javascript:void(0)">
