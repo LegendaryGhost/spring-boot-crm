@@ -62,7 +62,6 @@ public class CSVFile<T> {
                     this.errors.add(ex.getMessage());
                 }
                 line++;
-                System.out.println();
             }
 
         } catch (Exception e) {

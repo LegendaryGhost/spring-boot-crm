@@ -6,7 +6,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import site.easy.to.build.crm.dto.CsvImportForm;
-import site.easy.to.build.crm.util.CSVUtils;
+import site.easy.to.build.crm.util.csv.CSVUtils;
 
 @AllArgsConstructor
 @Controller
@@ -40,7 +40,7 @@ public class DataImportController {
             return "import/import-users";
         }
 
-        csvUtils.readCSVFile(csvImportForm);
+        csvUtils.saveUsersFromCSV(csvImportForm);
 
         return "redirect:/manager/all-users";
     }
