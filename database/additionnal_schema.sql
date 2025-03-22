@@ -9,15 +9,15 @@ CREATE TABLE temp_users
 
 CREATE TABLE budgets
 (
-    id          INT AUTO_INCREMENT,
+    budget_id   INT AUTO_INCREMENT,
     budget_name VARCHAR(255)   NOT NULL,
     amount      DECIMAL(15, 2) NOT NULL,
     start_date  DATE           NOT NULL,
     end_date    DATE           NOT NULL,
     created_at  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    customer_id INT            NOT NULL,
-    PRIMARY KEY (id),
+    customer_id INT UNSIGNED   NOT NULL,
+    PRIMARY KEY (budget_id),
     FOREIGN KEY (customer_id) REFERENCES customer (customer_id)
 );
 
@@ -29,9 +29,9 @@ CREATE TABLE expenses
     expense_date DATE           NOT NULL,
     created_at   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    lead_id      INT,
-    ticket_id    INT,
-    budget_id    INT            NOT NULL,
+    lead_id      INT UNSIGNED,
+    ticket_id    INT UNSIGNED,
+    budget_id    INT UNSIGNED   NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (lead_id) REFERENCES trigger_lead (lead_id),
     FOREIGN KEY (ticket_id) REFERENCES trigger_ticket (ticket_id),

@@ -119,6 +119,17 @@
                         <li><a th:href="${home + 'employee/customer/create-customer'}">Create customer</a></li>
                     </ul>
                 </li>
+                <li th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}" class="nav-small-cap">--- Budget</li>
+                <li>
+                    <a th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}" class="has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span class="hide-menu">Budget</span>
+                    </a>
+                    <ul th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}" class="collapse">
+                        <li><a th:href="${home + 'manager/budget'}">All budget</a></li>
+                        <li><a th:href="${home + 'manager/budget/create'}">Add budget</a></li>
+                    </ul>
+                </li>
                 <li class="nav-small-cap">--- Tickets</li>
                 <li>
                     <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)">
