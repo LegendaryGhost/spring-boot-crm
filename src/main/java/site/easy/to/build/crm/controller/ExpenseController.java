@@ -7,10 +7,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import site.easy.to.build.crm.dto.TicketExpenseForm;
 import site.easy.to.build.crm.entity.Budget;
+import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.entity.Expense;
 import site.easy.to.build.crm.entity.Ticket;
-import site.easy.to.build.crm.service.ExpenseService;
+import site.easy.to.build.crm.service.budget.ExpenseService;
 import site.easy.to.build.crm.service.budget.BudgetService;
+import site.easy.to.build.crm.service.customer.CustomerServiceImpl;
 import site.easy.to.build.crm.service.ticket.TicketServiceImpl;
 
 import javax.validation.Valid;
@@ -24,6 +26,7 @@ public class ExpenseController {
     private final TicketServiceImpl ticketServiceImpl;
     private final BudgetService budgetService;
     private final ExpenseService expenseService;
+    private final CustomerServiceImpl customerServiceImpl;
 
     @GetMapping("/ticket/{ticketId}/create")
     public String showExpenseForm(@PathVariable("ticketId") int ticketId, Model model) {
@@ -66,6 +69,23 @@ public class ExpenseController {
         expense.setExpenseDate(ticket.getCreatedAt().toLocalDate());
         expenseService.save(expense);
         return "redirect:/expenses/customer/" + ticket.getCustomer().getCustomerId();
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public String showCustomerExpenses(@PathVariable("customerId") int customerId, Model model) {
+        Customer customer = customerServiceImpl.findByCustomerId(customerId);
+        if (customer == null) {
+            return "error/not-found";
+        }
+
+        double customerTotalExpense = expenseService.findTotalExpenseByCustomerId(customerId);
+        List<Expense> expenses = expenseService.findByCutomerId(customerId);
+
+        model.addAttribute("customerTotalExpense", customerTotalExpense);
+        model.addAttribute("expenses", expenses);
+        model.addAttribute("customer", customer);
+
+        return "expense/customer-expenses";
     }
 
 }
