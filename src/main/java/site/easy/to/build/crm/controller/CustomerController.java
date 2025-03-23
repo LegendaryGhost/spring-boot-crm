@@ -17,6 +17,7 @@ import site.easy.to.build.crm.entity.OAuthUser;
 import site.easy.to.build.crm.entity.User;
 import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
+import site.easy.to.build.crm.service.budget.BudgetService;
 import site.easy.to.build.crm.service.contract.ContractService;
 import site.easy.to.build.crm.service.customer.CustomerLoginInfoService;
 import site.easy.to.build.crm.service.customer.CustomerService;
@@ -43,11 +44,12 @@ public class CustomerController {
     private final TicketService ticketService;
     private final ContractService contractService;
     private final LeadService leadService;
+    private final BudgetService budgetService;
 
     @Autowired
     public CustomerController(CustomerService customerService, UserService userService, CustomerLoginInfoService customerLoginInfoService,
                               AuthenticationUtils authenticationUtils, GoogleGmailApiService googleGmailApiService, Environment environment,
-                              TicketService ticketService, ContractService contractService, LeadService leadService) {
+                              TicketService ticketService, ContractService contractService, LeadService leadService, BudgetService budgetService) {
         this.customerService = customerService;
         this.userService = userService;
         this.customerLoginInfoService = customerLoginInfoService;
@@ -57,6 +59,7 @@ public class CustomerController {
         this.ticketService = ticketService;
         this.contractService = contractService;
         this.leadService = leadService;
+        this.budgetService = budgetService;
     }
 
     @GetMapping("/manager/all-customers")
@@ -100,8 +103,10 @@ public class CustomerController {
         if(!AuthorizationUtil.checkIfUserAuthorized(employee,loggedInUser)) {
             return "redirect:/access-denied";
         }
+        double customerTotalBudget = budgetService.findTotalBudgetByCustomerId(id);
 
         model.addAttribute("customer",customer);
+        model.addAttribute("customerTotalBudget", customerTotalBudget);
         return "customer/customer-details";
     }
 

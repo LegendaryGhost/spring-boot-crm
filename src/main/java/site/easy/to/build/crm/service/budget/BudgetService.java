@@ -20,4 +20,8 @@ public class BudgetService {
     public void save(Budget budget) {
         budgetRepository.save(budget);
     }
+
+    public double findTotalBudgetByCustomerId(int customerId) {
+        return budgetRepository.findSumAmountByCustomerId(customerId);
+    }
 }
