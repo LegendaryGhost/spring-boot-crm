@@ -24,4 +24,8 @@ public class BudgetService {
     public double findTotalBudgetByCustomerId(int customerId) {
         return budgetRepository.findSumAmountByCustomerId(customerId);
     }
+
+    public List<Budget> findByCustomerId(int customerId) {
+        return budgetRepository.findByCustomerId(customerId);
+    }
 }

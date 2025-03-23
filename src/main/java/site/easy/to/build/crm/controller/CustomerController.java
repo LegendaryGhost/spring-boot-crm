@@ -11,10 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import site.easy.to.build.crm.entity.Customer;
-import site.easy.to.build.crm.entity.CustomerLoginInfo;
-import site.easy.to.build.crm.entity.OAuthUser;
-import site.easy.to.build.crm.entity.User;
+import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
 import site.easy.to.build.crm.service.budget.BudgetService;
@@ -108,6 +105,28 @@ public class CustomerController {
         model.addAttribute("customer",customer);
         model.addAttribute("customerTotalBudget", customerTotalBudget);
         return "customer/customer-details";
+    }
+
+    @GetMapping("/{id}/budgets")
+    public String showCustomerBudget(@PathVariable("id") int id, Model model, Authentication authentication) {
+        int userId = authenticationUtils.getLoggedInUserId(authentication);
+        User loggedInUser = userService.findById(userId);
+        if(loggedInUser.isInactiveUser()) {
+            return "error/account-inactive";
+        }
+
+        Customer customer = customerService.findByCustomerId(id);
+        if(customer == null) {
+            return "error/not-found";
+        }
+
+        List<Budget> budgets = budgetService.findByCustomerId(id);
+        double customerTotalBudget = budgetService.findTotalBudgetByCustomerId(id);
+        model.addAttribute("customer",customer);
+        model.addAttribute("budgets",budgets);
+        model.addAttribute("customerTotalBudget", customerTotalBudget);
+
+        return "budget/customer-budgets";
     }
 
     @GetMapping("/create-customer")
