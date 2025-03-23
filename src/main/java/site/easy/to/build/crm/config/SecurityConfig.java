@@ -56,6 +56,7 @@ public class SecurityConfig {
         http.csrf((csrf) -> csrf
                 .csrfTokenRepository(httpSessionCsrfTokenRepository)
         );
+        http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
 
         http.
                 authorizeHttpRequests((authorize) -> authorize
@@ -115,6 +116,7 @@ public class SecurityConfig {
         http.csrf((csrf) -> csrf
                 .csrfTokenRepository(httpSessionCsrfTokenRepository)
         );
+        http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
 
         http.securityMatcher("/customer-login/**").
                 authorizeHttpRequests((authorize) -> authorize
