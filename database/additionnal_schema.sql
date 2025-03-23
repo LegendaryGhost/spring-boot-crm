@@ -31,10 +31,10 @@ CREATE TABLE expenses
     updated_at   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     lead_id      INT UNSIGNED,
     ticket_id    INT UNSIGNED,
-    budget_id    INT UNSIGNED   NOT NULL,
+    budget_id    INT            NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (lead_id) REFERENCES trigger_lead (lead_id),
     FOREIGN KEY (ticket_id) REFERENCES trigger_ticket (ticket_id),
-    FOREIGN KEY (budget_id) REFERENCES budgets (id)
+    FOREIGN KEY (budget_id) REFERENCES budgets (budget_id)
 );
 
