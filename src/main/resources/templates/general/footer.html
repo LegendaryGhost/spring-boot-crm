@@ -17,12 +17,12 @@
 <footer class="footer">
     © 2023 CRM by <a href="https://github.com/wp-ahmed">Ahmed Samir</a>
 </footer>
-<div id="warning-alert" class="alert alert-danger alert-dismissible fade show" role="alert">
+<div th:if="${warning}" id="warning-alert" class="alert alert-danger alert-dismissible fade show" role="alert">
     <strong>
         <i class="fas fa-exclamation-triangle"></i>
         Warning!
     </strong>
-    You should check in on some of those fields below.
+    <span th:text="${warning}"></span>
     <button type="button" class="btn-close border-0 bg-transparent" data-bs-dismiss="alert" aria-label="Close">X</button>
 </div>
 <script>

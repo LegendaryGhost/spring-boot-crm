@@ -16,4 +16,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("SELECT COALESCE(SUM(e.amount), 0 ) FROM Expense e WHERE e.budget.customer.customerId = :customerId")
     double findSumAmountByCustomerId(@Param("customerId") int customerId);
+
+    @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.budget.id = :budgetId")
+    double findSumAmountByBudgetId(@Param("budgetId") int budgetId);
 }

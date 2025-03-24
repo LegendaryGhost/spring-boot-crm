@@ -24,4 +24,9 @@ public class ExpenseService {
     public double findTotalExpenseByCustomerId(int customerId) {
         return expenseRepository.findSumAmountByCustomerId(customerId);
     }
+
+    public double findTotalExpenseByBudgetId(int budgetId) {
+        return expenseRepository.findSumAmountByBudgetId(budgetId);
+    }
+
 }
