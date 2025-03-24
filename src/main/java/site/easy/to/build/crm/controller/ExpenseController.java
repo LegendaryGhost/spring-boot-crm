@@ -66,6 +66,16 @@ public class ExpenseController {
             return "expense/create-ticket-expense";
         }
 
+        if (ticketExpenseForm.getConfirm() == null && budgetService.isBudgetExceeded(ticketExpenseForm.getBudgetId(), ticketExpenseForm.getAmount())) {
+            List<Budget> budgets = budgetService.findByCustomerId(ticket.getCustomer().getCustomerId());
+            model.addAttribute("budgets", budgets);
+            model.addAttribute("expense", ticketExpenseForm);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(budget.getAmount(), 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
+            return "expense/create-ticket-expense";
+        }
+
         // Create an expense from the form
         Expense expense = new Expense();
         expense.setTicket(ticket);
@@ -74,14 +84,6 @@ public class ExpenseController {
         expense.setDescription(ticketExpenseForm.getDescription());
         expense.setExpenseDate(ticket.getCreatedAt().toLocalDate());
 
-        if (ticketExpenseForm.getConfirm() != null && budgetService.isBudgetExceeded(ticketExpenseForm.getBudgetId(), ticketExpenseForm.getAmount())) {
-            List<Budget> budgets = budgetService.findByCustomerId(ticket.getCustomer().getCustomerId());
-            model.addAttribute("budgets", budgets);
-            model.addAttribute("expense", ticketExpenseForm);
-            model.addAttribute("confirm",
-                    "The budget limit " + numbers.formatDecimal(budget.getAmount(), 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
-            );
-        }
 
         expenseService.save(expense);
 
@@ -121,6 +123,16 @@ public class ExpenseController {
         if (bindingResult.hasErrors()) {
             List<Budget> budgets = budgetService.findByCustomerId(lead.getCustomer().getCustomerId());
             model.addAttribute("budgets", budgets);
+            return "expense/create-lead-expense";
+        }
+
+        if (leadExpenseForm.getConfirm() == null && budgetService.isBudgetExceeded(leadExpenseForm.getBudgetId(), leadExpenseForm.getAmount())) {
+            List<Budget> budgets = budgetService.findByCustomerId(lead.getCustomer().getCustomerId());
+            model.addAttribute("budgets", budgets);
+            model.addAttribute("expense", leadExpenseForm);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(budget.getAmount(), 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
             return "expense/create-lead-expense";
         }
 
