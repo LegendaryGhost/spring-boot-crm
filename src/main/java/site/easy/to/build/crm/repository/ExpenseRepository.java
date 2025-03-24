@@ -9,7 +9,7 @@ import site.easy.to.build.crm.entity.Expense;
 import java.util.List;
 
 @Repository
-public interface ExpenseRepository extends JpaRepository<Expense, Long> {
+public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
 
     @Query("SELECT e FROM Expense e WHERE e.budget.customer.customerId = :customerId")
     List<Expense> findByCustomerId(@Param("customerId") int cutomerId);
@@ -19,4 +19,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.budget.id = :budgetId")
     double findSumAmountByBudgetId(@Param("budgetId") int budgetId);
+
+    @Query("SELECT e FROM Expense e WHERE e.ticket IS NOT NULL")
+    List<Expense> findAllTicketsExpenses();
+
+    @Query("SELECT e FROM Expense e WHERE e.lead IS NOT NULL")
+    List<Expense> findAllLeadsExpenses();
 }

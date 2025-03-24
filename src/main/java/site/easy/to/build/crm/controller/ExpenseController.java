@@ -1,6 +1,5 @@
 package site.easy.to.build.crm.controller;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +12,6 @@ import site.easy.to.build.crm.dto.TicketExpenseForm;
 import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.service.budget.ExpenseService;
 import site.easy.to.build.crm.service.budget.BudgetService;
-import site.easy.to.build.crm.service.configuration.ConfigurationService;
 import site.easy.to.build.crm.service.customer.CustomerServiceImpl;
 import site.easy.to.build.crm.service.lead.LeadServiceImpl;
 import site.easy.to.build.crm.service.ticket.TicketServiceImpl;
@@ -68,16 +66,6 @@ public class ExpenseController {
             return "expense/create-ticket-expense";
         }
 
-        if (ticketExpenseForm.getConfirm() == null && budgetService.isBudgetExceeded(ticketExpenseForm.getBudgetId(), ticketExpenseForm.getAmount())) {
-            List<Budget> budgets = budgetService.findByCustomerId(ticket.getCustomer().getCustomerId());
-            model.addAttribute("budgets", budgets);
-            model.addAttribute("expense", ticketExpenseForm);
-            model.addAttribute("confirm",
-                    "The budget limit " + numbers.formatDecimal(budget.getAmount(), 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
-            );
-            return "expense/create-ticket-expense";
-        }
-
         // Create an expense from the form
         Expense expense = new Expense();
         expense.setTicket(ticket);
@@ -85,6 +73,15 @@ public class ExpenseController {
         expense.setAmount(ticketExpenseForm.getAmount());
         expense.setDescription(ticketExpenseForm.getDescription());
         expense.setExpenseDate(ticket.getCreatedAt().toLocalDate());
+
+        if (ticketExpenseForm.getConfirm() != null && budgetService.isBudgetExceeded(ticketExpenseForm.getBudgetId(), ticketExpenseForm.getAmount())) {
+            List<Budget> budgets = budgetService.findByCustomerId(ticket.getCustomer().getCustomerId());
+            model.addAttribute("budgets", budgets);
+            model.addAttribute("expense", ticketExpenseForm);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(budget.getAmount(), 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
+        }
 
         expenseService.save(expense);
 
@@ -127,16 +124,6 @@ public class ExpenseController {
             return "expense/create-lead-expense";
         }
 
-        if (leadExpenseForm.getConfirm() == null && budgetService.isBudgetExceeded(leadExpenseForm.getBudgetId(), leadExpenseForm.getAmount())) {
-            List<Budget> budgets = budgetService.findByCustomerId(lead.getCustomer().getCustomerId());
-            model.addAttribute("budgets", budgets);
-            model.addAttribute("expense", leadExpenseForm);
-            model.addAttribute("confirm",
-                    "The budget limit " + numbers.formatDecimal(budget.getAmount(), 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
-            );
-            return "expense/create-lead-expense";
-        }
-
         // Create an expense from the form
         Expense expense = new Expense();
         expense.setLead(lead);
@@ -159,7 +146,7 @@ public class ExpenseController {
         }
 
         double customerTotalExpense = expenseService.findTotalExpenseByCustomerId(customerId);
-        List<Expense> expenses = expenseService.findByCutomerId(customerId);
+        List<Expense> expenses = expenseService.findByCustomerId(customerId);
 
         model.addAttribute("customerTotalExpense", customerTotalExpense);
         model.addAttribute("expenses", expenses);

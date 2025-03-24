@@ -17,8 +17,8 @@ public class ExpenseService {
         return expenseRepository.save(expense);
     }
 
-    public List<Expense> findByCutomerId(int cutomerId) {
-        return expenseRepository.findByCustomerId(cutomerId);
+    public List<Expense> findByCustomerId(int customerId) {
+        return expenseRepository.findByCustomerId(customerId);
     }
 
     public double findTotalExpenseByCustomerId(int customerId) {
@@ -29,4 +29,24 @@ public class ExpenseService {
         return expenseRepository.findSumAmountByBudgetId(budgetId);
     }
 
+    public List<Expense> findAll() {
+        return expenseRepository.findAll();
+    }
+
+    public List<Expense> findAllLeadsExpenses() {
+        return expenseRepository.findAllLeadsExpenses();
+    }
+
+    public List<Expense> findAllTicketsExpenses() {
+        return expenseRepository.findAllTicketsExpenses();
+    }
+
+    public Expense findById(int id) {
+        return expenseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Expense not found"));
+    }
+
+    public void deleteById(int expenseId) {
+        expenseRepository.deleteById(expenseId);
+    }
 }

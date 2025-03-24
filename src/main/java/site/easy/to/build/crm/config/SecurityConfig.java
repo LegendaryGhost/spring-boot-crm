@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,16 +27,13 @@ public class SecurityConfig {
 
     private final CustomerUserDetails customerUserDetails;
 
-    private final Environment environment;
-
     @Autowired
     public SecurityConfig(OAuthLoginSuccessHandler oAuth2LoginSuccessHandler, CustomOAuth2UserService oauthUserService, CrmUserDetails crmUserDetails,
-                          CustomerUserDetails customerUserDetails, Environment environment) {
+                          CustomerUserDetails customerUserDetails) {
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
         this.oauthUserService = oauthUserService;
         this.crmUserDetails = crmUserDetails;
         this.customerUserDetails = customerUserDetails;
-        this.environment = environment;
     }
 
     @Bean
@@ -86,9 +82,7 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")
                         .permitAll())
-                .exceptionHandling(exception -> {
-                    exception.accessDeniedHandler(accessDeniedHandler());
-                });
+                .exceptionHandling(exception -> exception.accessDeniedHandler(accessDeniedHandler()));
 
 
         return http.build();
