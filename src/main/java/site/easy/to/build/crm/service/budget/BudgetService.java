@@ -8,6 +8,7 @@ import site.easy.to.build.crm.entity.Budget;
 import site.easy.to.build.crm.repository.BudgetRepository;
 import site.easy.to.build.crm.service.configuration.ConfigurationService;
 
+import javax.validation.constraints.Min;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,5 +52,12 @@ public class BudgetService {
                     numbers.formatDecimal(thresholdAmount, 1, "COMMA", 2, "POINT") + ") threshold was reached on the budget " + budget.getName()
             );
         }
+    }
+
+    public boolean isBudgetExceeded(int budgetId, double newExpense) {
+        Budget budget = budgetRepository.findById(budgetId)
+                .orElseThrow(() -> new IllegalArgumentException("Budget not found"));
+        double totalBudgetExpenses = expenseService.findTotalExpenseByBudgetId(budgetId);
+        return totalBudgetExpenses + newExpense > budget.getAmount();
     }
 }

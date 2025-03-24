@@ -1,11 +1,13 @@
 package site.easy.to.build.crm.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.expression.Numbers;
 import site.easy.to.build.crm.dto.LeadExpenseForm;
 import site.easy.to.build.crm.dto.TicketExpenseForm;
 import site.easy.to.build.crm.entity.*;
@@ -18,8 +20,9 @@ import site.easy.to.build.crm.service.ticket.TicketServiceImpl;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/expenses")
 public class ExpenseController {
@@ -29,7 +32,7 @@ public class ExpenseController {
     private final ExpenseService expenseService;
     private final CustomerServiceImpl customerServiceImpl;
     private final LeadServiceImpl leadServiceImpl;
-    private final ConfigurationService configurationService;
+    private final Numbers numbers = new Numbers(Locale.FRANCE);
 
     @GetMapping("/ticket/{ticketId}/create")
     public String showTicketExpenseForm(@PathVariable("ticketId") int ticketId, Model model) {
@@ -49,13 +52,6 @@ public class ExpenseController {
 
     @PostMapping("/ticket/save")
     public String saveTicketExpense(@ModelAttribute("expense") @Valid TicketExpenseForm ticketExpenseForm, Model model, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        if (bindingResult.hasErrors()) {
-            Ticket ticket = ticketServiceImpl.findByTicketId(ticketExpenseForm.getTicketId());
-            List<Budget> budgets = budgetService.findByCustomerId(ticket.getCustomer().getCustomerId());
-            model.addAttribute("budgets", budgets);
-            return "expense/create-ticket-expense";
-        }
-
         Ticket ticket = ticketServiceImpl.findByTicketId(ticketExpenseForm.getTicketId());
         if (ticket == null) {
             return "error/not-found";
@@ -66,6 +62,22 @@ public class ExpenseController {
             return "error/not-found";
         }
 
+        if (bindingResult.hasErrors()) {
+            List<Budget> budgets = budgetService.findByCustomerId(ticket.getCustomer().getCustomerId());
+            model.addAttribute("budgets", budgets);
+            return "expense/create-ticket-expense";
+        }
+
+        if (ticketExpenseForm.getConfirm() == null && budgetService.isBudgetExceeded(ticketExpenseForm.getBudgetId(), ticketExpenseForm.getAmount())) {
+            List<Budget> budgets = budgetService.findByCustomerId(ticket.getCustomer().getCustomerId());
+            model.addAttribute("budgets", budgets);
+            model.addAttribute("expense", ticketExpenseForm);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(budget.getAmount(), 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
+            return "expense/create-ticket-expense";
+        }
+
         // Create an expense from the form
         Expense expense = new Expense();
         expense.setTicket(ticket);
@@ -73,6 +85,7 @@ public class ExpenseController {
         expense.setAmount(ticketExpenseForm.getAmount());
         expense.setDescription(ticketExpenseForm.getDescription());
         expense.setExpenseDate(ticket.getCreatedAt().toLocalDate());
+
         expenseService.save(expense);
 
         budgetService.warnIfThresholdReached(redirectAttributes, budget);
@@ -98,13 +111,6 @@ public class ExpenseController {
 
     @PostMapping("/lead/save")
     public String saveLeadExpense(@ModelAttribute("expense") @Valid LeadExpenseForm leadExpenseForm, Model model, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        if (bindingResult.hasErrors()) {
-            Lead lead = leadServiceImpl.findByLeadId(leadExpenseForm.getLeadId());
-            List<Budget> budgets = budgetService.findByCustomerId(lead.getCustomer().getCustomerId());
-            model.addAttribute("budgets", budgets);
-            return "expense/create-lead-expense";
-        }
-
         Lead lead = leadServiceImpl.findByLeadId(leadExpenseForm.getLeadId());
         if (lead == null) {
             return "error/not-found";
@@ -113,6 +119,22 @@ public class ExpenseController {
         Budget budget = budgetService.findById(leadExpenseForm.getBudgetId());
         if (budget == null) {
             return "error/not-found";
+        }
+
+        if (bindingResult.hasErrors()) {
+            List<Budget> budgets = budgetService.findByCustomerId(lead.getCustomer().getCustomerId());
+            model.addAttribute("budgets", budgets);
+            return "expense/create-lead-expense";
+        }
+
+        if (leadExpenseForm.getConfirm() == null && budgetService.isBudgetExceeded(leadExpenseForm.getBudgetId(), leadExpenseForm.getAmount())) {
+            List<Budget> budgets = budgetService.findByCustomerId(lead.getCustomer().getCustomerId());
+            model.addAttribute("budgets", budgets);
+            model.addAttribute("expense", leadExpenseForm);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(budget.getAmount(), 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
+            return "expense/create-lead-expense";
         }
 
         // Create an expense from the form
