@@ -38,3 +38,9 @@ CREATE TABLE expenses
     FOREIGN KEY (budget_id) REFERENCES budgets (budget_id)
 );
 
+CREATE TABLE configuration
+(
+    configuration_key   VARCHAR(255),
+    configuration_value VARCHAR(255) NOT NULL,
+    PRIMARY KEY (configuration_key)
+);

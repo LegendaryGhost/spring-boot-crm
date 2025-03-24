@@ -5,11 +5,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import site.easy.to.build.crm.dto.LeadExpenseForm;
 import site.easy.to.build.crm.dto.TicketExpenseForm;
 import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.service.budget.ExpenseService;
 import site.easy.to.build.crm.service.budget.BudgetService;
+import site.easy.to.build.crm.service.configuration.ConfigurationService;
 import site.easy.to.build.crm.service.customer.CustomerServiceImpl;
 import site.easy.to.build.crm.service.lead.LeadServiceImpl;
 import site.easy.to.build.crm.service.ticket.TicketServiceImpl;
@@ -27,6 +29,7 @@ public class ExpenseController {
     private final ExpenseService expenseService;
     private final CustomerServiceImpl customerServiceImpl;
     private final LeadServiceImpl leadServiceImpl;
+    private final ConfigurationService configurationService;
 
     @GetMapping("/ticket/{ticketId}/create")
     public String showTicketExpenseForm(@PathVariable("ticketId") int ticketId, Model model) {
@@ -45,7 +48,7 @@ public class ExpenseController {
     }
 
     @PostMapping("/ticket/save")
-    public String saveTicketExpense(@ModelAttribute("expense") @Valid TicketExpenseForm ticketExpenseForm, Model model, BindingResult bindingResult) {
+    public String saveTicketExpense(@ModelAttribute("expense") @Valid TicketExpenseForm ticketExpenseForm, Model model, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             Ticket ticket = ticketServiceImpl.findByTicketId(ticketExpenseForm.getTicketId());
             List<Budget> budgets = budgetService.findByCustomerId(ticket.getCustomer().getCustomerId());
@@ -71,6 +74,9 @@ public class ExpenseController {
         expense.setDescription(ticketExpenseForm.getDescription());
         expense.setExpenseDate(ticket.getCreatedAt().toLocalDate());
         expenseService.save(expense);
+
+        budgetService.warnIfThresholdReached(redirectAttributes, budget);
+
         return "redirect:/expenses/customer/" + ticket.getCustomer().getCustomerId();
     }
 
@@ -91,7 +97,7 @@ public class ExpenseController {
     }
 
     @PostMapping("/lead/save")
-    public String saveLeadExpense(@ModelAttribute("expense") @Valid LeadExpenseForm leadExpenseForm, Model model, BindingResult bindingResult) {
+    public String saveLeadExpense(@ModelAttribute("expense") @Valid LeadExpenseForm leadExpenseForm, Model model, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             Lead lead = leadServiceImpl.findByLeadId(leadExpenseForm.getLeadId());
             List<Budget> budgets = budgetService.findByCustomerId(lead.getCustomer().getCustomerId());
@@ -117,6 +123,9 @@ public class ExpenseController {
         expense.setDescription(leadExpenseForm.getDescription());
         expense.setExpenseDate(lead.getCreatedAt().toLocalDate());
         expenseService.save(expense);
+
+        budgetService.warnIfThresholdReached(redirectAttributes, budget);
+
         return "redirect:/expenses/customer/" + lead.getCustomer().getCustomerId();
     }
 
