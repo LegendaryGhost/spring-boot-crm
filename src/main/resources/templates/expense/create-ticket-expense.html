@@ -96,6 +96,14 @@
                                         <option th:each="budget : ${budgets}" th:text="${budget.name}" th:value="${budget.id}"></option>
                                     </select>
                                 </div>
+
+                                <div class="mt-4 alert alert-danger d-flex align-items-center" role="alert">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <div>
+                                        The budget limit will be exceeded if you confirm this expense.
+                                    </div>
+                                </div>
+
                                 <button type="submit" class="btn btn-primary m-t-20">Create expense</button>
                             </form>
                         </div>
