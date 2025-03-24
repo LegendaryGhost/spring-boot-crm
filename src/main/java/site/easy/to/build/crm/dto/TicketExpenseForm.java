@@ -16,6 +16,8 @@ public class TicketExpenseForm {
 
     private int budgetId;
 
+    private String confirm;
+
     public TicketExpenseForm(int ticketId) {
         this.ticketId = ticketId;
     }

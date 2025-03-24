@@ -16,6 +16,8 @@ public class LeadExpenseForm {
 
     private int budgetId;
 
+    private String confirm;
+
     public LeadExpenseForm(int leadId) {
         this.leadId = leadId;
     }

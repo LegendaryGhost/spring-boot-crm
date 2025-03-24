@@ -74,6 +74,8 @@
                             <form th:object="${expense}" th:action="@{/expenses/lead/save}" id="email-form" method="post">
                                 <input type="hidden" th:field="*{leadId}" />
 
+                                <input th:if="${confirm}" type="hidden" th:field="*{confirm}">
+
                                 <label class="m-t-20" for="amount">Amount:</label>
                                 <div class="input-group">
                                     <input type="number" step="0.01" id="amount" th:field="*{amount}" class="form-control">
@@ -96,7 +98,17 @@
                                         <option th:each="budget : ${budgets}" th:text="${budget.name}" th:value="${budget.id}"></option>
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-primary m-t-20">Create expense</button>
+
+                                <div th:if="${confirm}" class="mt-4 alert alert-danger d-flex align-items-center" role="alert">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <div th:text="${confirm}"></div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary m-t-20"
+                                        th:text="${confirm != null} ? 'Confirm' : 'Create lead expense'">
+                                    Create lead expense
+                                </button>
+                                <a th:if="${confirm != null}" th:href="@{/}" class="btn btn-secondary m-t-20">Cancel</a>
                             </form>
                         </div>
                     </div>
