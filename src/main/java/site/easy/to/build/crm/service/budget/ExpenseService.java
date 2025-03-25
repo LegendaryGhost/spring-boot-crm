@@ -49,4 +49,12 @@ public class ExpenseService {
     public void deleteById(int expenseId) {
         expenseRepository.deleteById(expenseId);
     }
+
+    public double findTotalLeadExpense() {
+        return expenseRepository.findSumAmountLead();
+    }
+
+    public double findTotalTicketExpense() {
+        return expenseRepository.findSumAmountTicket();
+    }
 }

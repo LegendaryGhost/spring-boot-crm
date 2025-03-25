@@ -25,4 +25,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
 
     @Query("SELECT e FROM Expense e WHERE e.lead IS NOT NULL")
     List<Expense> findAllLeadsExpenses();
+
+    @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.lead IS NOT NULL")
+    double findSumAmountLead();
+
+    @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.ticket IS NOT NULL")
+    double findSumAmountTicket();
 }

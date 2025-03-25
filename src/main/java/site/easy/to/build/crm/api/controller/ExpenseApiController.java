@@ -5,10 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.easy.to.build.crm.api.*;
+import site.easy.to.build.crm.api.dto.DashboardDTO;
 import site.easy.to.build.crm.entity.Expense;
+import site.easy.to.build.crm.service.budget.BudgetService;
 import site.easy.to.build.crm.service.budget.ExpenseService;
 
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -17,17 +18,20 @@ import java.util.List;
 public class ExpenseApiController {
 
     private final ExpenseService expenseService;
+    private final BudgetService budgetService;
 //    private final BudgetAlertConfigService budgetAlertConfigService;
 
     @GetMapping("/dashboard")
     @JsonView({POV.Dashboard.class})
-    public HashMap<String, List<Expense>> findDashboardData() {
-        HashMap<String, List<Expense>> maps = new HashMap<>();
-        maps.put("all", expenseService.findAll());
-        maps.put("lead", expenseService.findAllLeadsExpenses());
-        maps.put("ticket", expenseService.findAllTicketsExpenses());
-
-        return maps;
+    public DashboardDTO findDashboardData() {
+        return new DashboardDTO(
+                budgetService.findTotalCustomerBudget(),
+                expenseService.findTotalLeadExpense(),
+                expenseService.findTotalTicketExpense(),
+                expenseService.findAll(),
+                expenseService.findAllLeadsExpenses(),
+                expenseService.findAllTicketsExpenses()
+        );
     }
 
     @GetMapping

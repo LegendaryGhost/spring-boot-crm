@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.expression.Numbers;
 import site.easy.to.build.crm.entity.Budget;
+import site.easy.to.build.crm.entity.Expense;
 import site.easy.to.build.crm.repository.BudgetRepository;
 import site.easy.to.build.crm.service.configuration.ConfigurationService;
 
@@ -59,5 +60,9 @@ public class BudgetService {
                 .orElseThrow(() -> new IllegalArgumentException("Budget not found"));
         double totalBudgetExpenses = expenseService.findTotalExpenseByBudgetId(budgetId);
         return totalBudgetExpenses + newExpense > budget.getAmount();
+    }
+
+    public double findTotalCustomerBudget() {
+        return budgetRepository.findSumAmount();
     }
 }
