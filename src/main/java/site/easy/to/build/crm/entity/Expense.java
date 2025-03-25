@@ -19,24 +19,24 @@ public class Expense {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @JsonView({POV.TicketExpense.class, POV.Expense.class, POV.Dashboard.class})
+    @JsonView({POV.TicketExpense.class, POV.LeadExpense.class, POV.Expense.class, POV.Dashboard.class})
     private Integer id;
 
     @NotNull(message = "Amount cannot be null")
     @Min(value = 0, message = "Min amount is 0")
     @Column(name = "amount")
-    @JsonView({POV.TicketExpense.class, POV.Expense.class, POV.Dashboard.class})
+    @JsonView({POV.TicketExpense.class, POV.LeadExpense.class, POV.Expense.class, POV.Dashboard.class})
     private Double amount;
 
     @Column(name = "description")
-    @JsonView(POV.TicketExpense.class)
+    @JsonView({POV.TicketExpense.class, POV.LeadExpense.class})
     private String description;
 
     @Column(name = "expense_date")
     private LocalDate expenseDate;
 
     @Column(name = "created_at", insertable = false, updatable = false)
-    @JsonView({POV.TicketExpense.class, POV.Expense.class, POV.Dashboard.class})
+    @JsonView({POV.TicketExpense.class, POV.LeadExpense.class, POV.Expense.class, POV.Dashboard.class})
     private LocalDateTime creationDate = LocalDateTime.now();
 
     @Column(name = "updated_at", insertable = false, updatable = false)
@@ -44,7 +44,7 @@ public class Expense {
 
     @ManyToOne
     @JoinColumn(name = "lead_id")
-    @JsonView(POV.Expense.class)
+    @JsonView({POV.LeadExpense.class, POV.Expense.class})
     private Lead lead;
 
     @ManyToOne

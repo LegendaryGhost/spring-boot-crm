@@ -1,8 +1,10 @@
 package site.easy.to.build.crm.entity;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import site.easy.to.build.crm.api.POV;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,15 +15,18 @@ public class Lead {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lead_id")
+    @JsonView(POV.LeadExpense.class)
     private int leadId;
 
     @Column(name = "name")
     @NotBlank(message = "Name is required")
+    @JsonView(POV.LeadExpense.class)
     private String name;
 
     @Column(name = "status")
     @NotBlank(message = "Status is required")
     @Pattern(regexp = "^(meeting-to-schedule|scheduled|archived|success|assign-to-sales)$", message = "Invalid status")
+    @JsonView(POV.LeadExpense.class)
     private String status;
 
     @Column(name = "phone")
@@ -55,6 +60,7 @@ public class Lead {
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
+    @JsonView(POV.LeadExpense.class)
     private Customer customer;
 
     @Column(name = "created_at")

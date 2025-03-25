@@ -47,7 +47,7 @@ public class ExpenseApiController {
     }
 
     @GetMapping("/leads")
-    @JsonView({POV.Expense.class})
+    @JsonView({POV.LeadExpense.class})
     public List<Expense> findAllLeads() {
         return expenseService.findAllLeadsExpenses();
     }

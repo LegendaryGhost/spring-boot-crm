@@ -14,6 +14,9 @@ public class POV {
     public static class TicketExpense extends Public {
     }
 
+    public static class LeadExpense extends Public {
+    }
+
     public static class Dashboard extends Public {
     }
 
