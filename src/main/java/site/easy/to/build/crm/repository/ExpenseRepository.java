@@ -11,7 +11,15 @@ import java.util.List;
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
 
-    @Query("SELECT e FROM Expense e WHERE e.ticket.customer.customerId = :customerId OR e.lead.customer.customerId = :customerId")
+    @Query("""
+        SELECT e
+        FROM Expense e
+        WHERE e.ticket.customer.customerId = :customerId
+        UNION
+        SELECT e
+        FROM Expense e
+        WHERE e.lead.customer.customerId = :customerId
+    """)
     List<Expense> findByCustomerId(@Param("customerId") int customerId);
 
     @Query("SELECT COALESCE(SUM(e.amount), 0 ) FROM Expense e WHERE e.ticket.customer.customerId = :customerId OR e.lead.customer.customerId = :customerId")

@@ -2,7 +2,6 @@ package site.easy.to.build.crm.service.budget;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import site.easy.to.build.crm.api.dto.CustomerExpenseDTO;
 import site.easy.to.build.crm.api.dto.ExpenseTypeDTO;
 import site.easy.to.build.crm.entity.Expense;

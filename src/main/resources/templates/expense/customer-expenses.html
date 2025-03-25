@@ -85,10 +85,9 @@
                                         <th>#</th>
                                         <th>Description</th>
                                         <th>Amount</th>
-                                        <th>Date</th>
+                                        <th>Creation date</th>
                                         <th>Lead</th>
                                         <th>Ticket</th>
-                                        <td>Budget</td>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -96,10 +95,9 @@
                                         <td th:text="${expense.id}"></td>
                                         <td th:text="${expense.description}"></td>
                                         <td th:text="${#numbers.formatDecimal(expense.amount, 1, 'COMMA', 2, 'POINT')}"></td>
-                                        <td th:text="${#temporals.format(expense.expenseDate, 'dd-MM-yyyy')}"></td>
-                                        <td th:text="${expense.lead == null ? '' : expense.lead.name}"></td>
-                                        <td th:text="${expense.ticket == null ? '' : expense.ticket.description}"></td>
-                                        <td th:text="${expense.budget}"></td>
+                                        <td th:text="${#temporals.format(expense.creationDate, 'dd-MM-yyyy')}"></td>
+                                        <td th:text="${expense.lead == null ? '-' : expense.lead.name}"></td>
+                                        <td th:text="${expense.ticket == null ? '-' : expense.ticket.description}"></td>
                                     </tr>
                                     </tbody>
                                 </table>
