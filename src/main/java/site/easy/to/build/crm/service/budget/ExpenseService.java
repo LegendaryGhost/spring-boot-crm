@@ -3,10 +3,12 @@ package site.easy.to.build.crm.service.budget;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.easy.to.build.crm.api.dto.CustomerExpenseDTO;
 import site.easy.to.build.crm.api.dto.ExpenseTypeDTO;
 import site.easy.to.build.crm.entity.Expense;
 import site.easy.to.build.crm.repository.ExpenseRepository;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,5 +89,16 @@ public class ExpenseService {
                 )
         );
         return types;
+    }
+
+    public List<CustomerExpenseDTO> findExpensesPerCustomer() {
+        return expenseRepository.findExpensesByCustomer()
+                .stream()
+                .map(expense -> new CustomerExpenseDTO(
+                        (String) expense[0],
+                        ((BigDecimal) expense[1]).doubleValue(),
+                        ((BigDecimal) expense[2]).doubleValue()
+                ))
+                .toList();
     }
 }

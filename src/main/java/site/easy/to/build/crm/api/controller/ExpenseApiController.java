@@ -20,7 +20,6 @@ public class ExpenseApiController {
 
     private final ExpenseService expenseService;
     private final BudgetService budgetService;
-//    private final BudgetAlertConfigService budgetAlertConfigService;
 
     @GetMapping("/dashboard")
     @JsonView({POV.Dashboard.class})
@@ -30,6 +29,7 @@ public class ExpenseApiController {
                 expenseService.findTotalLeadExpense(),
                 expenseService.findTotalTicketExpense(),
                 expenseService.findExpensesPerType(),
+                expenseService.findExpensesPerCustomer(),
                 expenseService.findAll(),
                 expenseService.findAllLeadsExpenses(),
                 expenseService.findAllTicketsExpenses()

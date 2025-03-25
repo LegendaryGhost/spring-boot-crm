@@ -17,6 +17,7 @@ public class DashboardDTO {
     private double totalLeadExpense;
     private double totalTicketExpense;
     private List<ExpenseTypeDTO> expenseTypes;
+    private List<CustomerExpenseDTO> customerExpenses;
     private List<Expense> all;
     private List<Expense> lead;
     private List<Expense> ticket;
