@@ -65,6 +65,9 @@ public class Ticket {
     @Transient
     private double amount;
 
+    @Transient
+    private String confirm;
+
     public Ticket() {
     }
 

@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.expression.Numbers;
 import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.entity.settings.TicketEmailSettings;
 import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
@@ -48,6 +49,8 @@ public class TicketController {
     private final EntityManager entityManager;
     private final ExpenseService expenseService;
     private final BudgetService budgetService;
+
+    private final Numbers numbers = new Numbers(Locale.FRANCE);
 
 
     @Autowired
@@ -172,6 +175,33 @@ public class TicketController {
             if(userId != employeeId || customer.getUser().getId() != userId) {
                 return "error/500";
             }
+        }
+
+        if (ticket.getConfirm() == null && budgetService.isBudgetExceeded(customerId, ticket.getAmount())) {
+            ticket.setEmployee(employee);
+            ticket.setManager(manager);
+            ticket.setCustomer(customer);
+
+            List<User> employees = new ArrayList<>();
+            List<Customer> customers;
+
+            if(AuthorizationUtil.hasRole(authentication, "ROLE_MANAGER")) {
+                employees = userService.findAll();
+                customers = customerService.findAll();
+            } else {
+                employees.add(manager);
+                customers = customerService.findByUserId(manager.getId());
+            }
+
+            double totalCustomerBudget = budgetService.findTotalBudgetByCustomerId(customerId);
+
+            model.addAttribute("ticket", ticket);
+            model.addAttribute("employees",employees);
+            model.addAttribute("customers",customers);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(totalCustomerBudget, 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
+            return "ticket/create-ticket";
         }
 
         ticket.setCustomer(customer);
@@ -302,6 +332,39 @@ public class TicketController {
 
         if(AuthorizationUtil.hasRole(authentication, "ROLE_EMPLOYEE") && employee.getId() != userId) {
             return "error/500";
+        }
+
+        if (ticket.getConfirm() == null && budgetService.isBudgetExceeded(customerId, ticket.getAmount())) {
+            ticket.setEmployee(employee);
+            ticket.setManager(manager);
+            ticket.setCustomer(customer);
+
+            List<User> employees = new ArrayList<>();
+            List<Customer> customers = new ArrayList<>();
+
+            if(AuthorizationUtil.hasRole(authentication, "ROLE_MANAGER")) {
+                employees = userService.findAll();
+                customers = customerService.findAll();
+            } else {
+                employees.add(loggedInUser);
+                //In case Employee's manager assign lead for the employee with a customer that's not created by this employee
+                //As a result of that the employee mustn't change the customer
+                if(!Objects.equals(employee.getId(), ticket.getManager().getId())) {
+                    customers.add(ticket.getCustomer());
+                } else {
+                    customers = customerService.findByUserId(loggedInUser.getId());
+                }
+            }
+
+            double totalCustomerBudget = budgetService.findTotalBudgetByCustomerId(customerId);
+
+            model.addAttribute("ticket", ticket);
+            model.addAttribute("employees",employees);
+            model.addAttribute("customers",customers);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(totalCustomerBudget, 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
+            return "ticket/update-ticket";
         }
 
         ticket.setCustomer(customer);
