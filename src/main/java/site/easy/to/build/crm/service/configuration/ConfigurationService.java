@@ -20,4 +20,12 @@ public class ConfigurationService {
         return Double.parseDouble(expenseThreshold.getValue());
     }
 
+    public void updateExpenseThreshold(double threshold) {
+        if (expenseThreshold == null) {
+            expenseThreshold = configurationRepository.findById("EXPENSE_THRESHOLD_PERCENTAGE")
+                    .orElseThrow(() -> new RuntimeException("Expense threshold not found"));
+        }
+        expenseThreshold.setValue(String.valueOf(threshold));
+        configurationRepository.save(expenseThreshold);
+    }
 }
