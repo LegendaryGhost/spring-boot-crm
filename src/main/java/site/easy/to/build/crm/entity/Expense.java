@@ -29,7 +29,7 @@ public class Expense {
     private Double amount;
 
     @Column(name = "description")
-    @JsonView({POV.TicketExpense.class, POV.LeadExpense.class})
+    @JsonView({POV.TicketExpense.class, POV.LeadExpense.class, POV.Expense.class})
     private String description;
 
     @Column(name = "expense_date")

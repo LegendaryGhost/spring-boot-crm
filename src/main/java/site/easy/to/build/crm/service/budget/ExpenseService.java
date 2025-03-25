@@ -63,4 +63,10 @@ public class ExpenseService {
     public void deleteByBudgetId(int budgetId) {
         expenseRepository.deleteByBudgetId(budgetId);
     }
+
+    public Expense updateAmountById(int expenseId, double newAmount) {
+        Expense expense = findById(expenseId);
+        expense.setAmount(newAmount);
+        return expenseRepository.save(expense);
+    }
 }
