@@ -13,10 +13,12 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.entity.settings.TicketEmailSettings;
 import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
+import site.easy.to.build.crm.service.budget.BudgetService;
 import site.easy.to.build.crm.service.budget.ExpenseService;
 import site.easy.to.build.crm.service.customer.CustomerService;
 import site.easy.to.build.crm.service.settings.TicketEmailSettingsService;
@@ -45,11 +47,12 @@ public class TicketController {
     private final GoogleGmailApiService googleGmailApiService;
     private final EntityManager entityManager;
     private final ExpenseService expenseService;
+    private final BudgetService budgetService;
 
 
     @Autowired
     public TicketController(TicketService ticketService, AuthenticationUtils authenticationUtils, UserService userService, CustomerService customerService,
-                            TicketEmailSettingsService ticketEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager, ExpenseService expenseService) {
+                            TicketEmailSettingsService ticketEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager, ExpenseService expenseService, BudgetService budgetService) {
         this.ticketService = ticketService;
         this.authenticationUtils = authenticationUtils;
         this.userService = userService;
@@ -58,6 +61,7 @@ public class TicketController {
         this.googleGmailApiService = googleGmailApiService;
         this.entityManager = entityManager;
         this.expenseService = expenseService;
+        this.budgetService = budgetService;
     }
 
     @GetMapping("/show-ticket/{id}")
@@ -131,7 +135,7 @@ public class TicketController {
     @PostMapping("/create-ticket")
     public String createTicket(@ModelAttribute("ticket") @Validated Ticket ticket, BindingResult bindingResult,
                                @RequestParam("customerId") int customerId, Model model,
-                               @RequestParam("employeeId") int employeeId, Authentication authentication) {
+                               @RequestParam("employeeId") int employeeId, Authentication authentication, RedirectAttributes redirectAttributes) {
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User manager = userService.findById(userId);
@@ -186,6 +190,8 @@ public class TicketController {
             expenseService.save(expense);
         }
 
+        budgetService.warnIfThresholdReached(redirectAttributes, customerId);
+
         return "redirect:/employee/ticket/assigned-tickets";
     }
 
@@ -235,7 +241,7 @@ public class TicketController {
     @PostMapping("/update-ticket")
     public String updateTicket(@ModelAttribute("ticket") @Validated Ticket ticket, BindingResult bindingResult,
                                @RequestParam("customerId") int customerId, @RequestParam("employeeId") int employeeId,
-                               Authentication authentication, Model model) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+                               Authentication authentication, Model model, RedirectAttributes redirectAttributes) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User loggedInUser = userService.findById(userId);
@@ -303,7 +309,7 @@ public class TicketController {
         ticket.setEmployee(employee);
         Ticket currentTicket = ticketService.save(ticket);
 
-        Expense expense = ticket.getExpense();
+        Expense expense = expenseService.findByTicketId(ticket.getTicketId());
         if (ticket.getAmount() > 0) {
             if (expense == null) {
                 expense = new Expense(
@@ -319,6 +325,8 @@ public class TicketController {
             expense.setAmount(ticket.getAmount());
             expenseService.save(expense);
         }
+
+        budgetService.warnIfThresholdReached(redirectAttributes, customerId);
 
         List<String> properties = DatabaseUtil.getColumnNames(entityManager, Ticket.class);
         Map<String, Pair<String,String>> changes = LogEntityChanges.trackChanges(originalTicket,currentTicket,properties);

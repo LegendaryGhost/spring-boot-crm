@@ -58,4 +58,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
     """, nativeQuery = true)
     List<Object[]> findExpensesByCustomer();
 
+    @Query("SELECT e FROM Expense e WHERE e.ticket.ticketId = :ticketId")
+    Expense findByTicketId(@Param("ticketId") int ticketId);
 }

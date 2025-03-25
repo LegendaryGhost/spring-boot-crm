@@ -91,4 +91,8 @@ public class ExpenseService {
                 ))
                 .toList();
     }
+
+    public Expense findByTicketId(int ticketId) {
+        return expenseRepository.findByTicketId(ticketId);
+    }
 }
