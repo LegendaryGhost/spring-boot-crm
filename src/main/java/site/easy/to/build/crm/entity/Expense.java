@@ -6,11 +6,13 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import site.easy.to.build.crm.api.POV;
 
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "expenses")
 public class Expense {
@@ -54,4 +56,15 @@ public class Expense {
         return (lead != null) ^ (ticket != null);
     }
 
+    public Expense(Double amount, String description, Ticket ticket) {
+        this.amount = amount;
+        this.description = description;
+        this.ticket = ticket;
+    }
+
+    public Expense(Double amount, String description, Lead lead) {
+        this.amount = amount;
+        this.description = description;
+        this.lead = lead;
+    }
 }

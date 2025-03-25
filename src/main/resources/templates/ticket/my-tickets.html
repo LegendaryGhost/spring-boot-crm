@@ -85,8 +85,8 @@
                                         <th>Status</th>
                                         <th>Customer</th>
                                         <th>Assigned Employee</th>
+                                        <th>Expense</th>
                                         <th>Show Full Details</th>
-                                        <th>Set expense</th>
                                         <th>Edit</th>
                                         <th>Delete</th>
                                     </tr>
@@ -99,8 +99,8 @@
                                         <td th:text="${ticket.status}"></td>
                                         <td th:text="${ticket.customer.name}"></td>
                                         <td th:text="${ticket.employee.username}"></td>
+                                        <td th:text="${ticket.expense == null ? '-' : #numbers.formatDecimal(ticket.expense.amount, 1, 'COMMA', 2, 'POINT')}"></td>
                                         <td><a th:href="${home + 'employee/ticket/show-ticket/' + ticket.ticketId}"><i class="fas fa-eye"></i></a></td>
-                                        <td><a th:href="${home + 'expenses/ticket/' + ticket.ticketId + '/create'}"><i class="fas fa-money-bill"></i></a></td>
                                         <td><a th:href="${home + 'employee/ticket/update-ticket/' + ticket.ticketId}"><i class="fas fa-edit"></i></a></td>
                                         <td>
                                             <form th:action="${home + 'employee/ticket/delete-ticket/' + ticket.ticketId}" method="post">

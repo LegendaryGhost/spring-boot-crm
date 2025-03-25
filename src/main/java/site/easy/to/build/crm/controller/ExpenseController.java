@@ -35,14 +35,10 @@ public class ExpenseController {
     @GetMapping("/ticket/{ticketId}/create")
     public String showTicketExpenseForm(@PathVariable("ticketId") int ticketId, Model model) {
         Ticket ticket = ticketServiceImpl.findByTicketId(ticketId);
-
         if (ticket == null) {
             return "error/not-found";
         }
 
-        List<Budget> budgets = budgetService.findByCustomerId(ticket.getCustomer().getCustomerId());
-
-        model.addAttribute("budgets", budgets);
         model.addAttribute("expense", new TicketExpenseForm(ticketId));
 
         return "expense/create-ticket-expense";
@@ -70,11 +66,11 @@ public class ExpenseController {
         }
 
         // Create an expense from the form
-        Expense expense = new Expense();
-        expense.setTicket(ticket);
-        expense.setAmount(ticketExpenseForm.getAmount());
-        expense.setDescription(ticketExpenseForm.getDescription());
-
+        Expense expense = new Expense(
+                ticketExpenseForm.getAmount(),
+                ticketExpenseForm.getDescription(),
+                ticket
+        );
         expenseService.save(expense);
 
         budgetService.warnIfThresholdReached(redirectAttributes, customerId);
@@ -102,8 +98,6 @@ public class ExpenseController {
         }
 
         if (bindingResult.hasErrors()) {
-            List<Budget> budgets = budgetService.findByCustomerId(lead.getCustomer().getCustomerId());
-            model.addAttribute("budgets", budgets);
             return "expense/create-lead-expense";
         }
 
@@ -118,10 +112,11 @@ public class ExpenseController {
         }
 
         // Create an expense from the form
-        Expense expense = new Expense();
-        expense.setLead(lead);
-        expense.setAmount(leadExpenseForm.getAmount());
-        expense.setDescription(leadExpenseForm.getDescription());
+        Expense expense = new Expense(
+                leadExpenseForm.getAmount(),
+                leadExpenseForm.getDescription(),
+                lead
+        );
         expenseService.save(expense);
 
         budgetService.warnIfThresholdReached(redirectAttributes, customerId);

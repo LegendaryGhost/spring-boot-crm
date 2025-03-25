@@ -2,6 +2,7 @@ package site.easy.to.build.crm.entity;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -54,6 +55,13 @@ public class Ticket {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @OneToOne(mappedBy = "ticket")
+    private Expense expense;
+
+    @Min(0)
+    @Transient
+    private double amount;
 
     public Ticket() {
     }

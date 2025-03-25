@@ -92,13 +92,6 @@
                                     <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
                                 </div>
 
-                                <label class="m-t-20" for="budgetId">Budget:</label>
-                                <div class="input-group">
-                                    <select name="budgetId" id="budgetId" class="form-control">
-                                        <option th:each="budget : ${budgets}" th:text="${budget.name}" th:value="${budget.id}"></option>
-                                    </select>
-                                </div>
-
                                 <div th:if="${confirm}" class="mt-4 alert alert-danger d-flex align-items-center" role="alert">
                                     <i class="fas fa-exclamation-triangle"></i>
                                     <div th:text="${confirm}"></div>
