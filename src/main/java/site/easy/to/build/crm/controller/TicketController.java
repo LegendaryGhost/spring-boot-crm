@@ -224,6 +224,8 @@ public class TicketController {
             }
         }
 
+        ticket.setAmount(ticket.getExpense() == null ? 0 : ticket.getExpense().getAmount());
+
         model.addAttribute("employees",employees);
         model.addAttribute("customers",customers);
         model.addAttribute("ticket", ticket);
@@ -300,6 +302,23 @@ public class TicketController {
         ticket.setManager(manager);
         ticket.setEmployee(employee);
         Ticket currentTicket = ticketService.save(ticket);
+
+        Expense expense = ticket.getExpense();
+        if (ticket.getAmount() > 0) {
+            if (expense == null) {
+                expense = new Expense(
+                        ticket.getAmount(),
+                        ticket.getSubject(),
+                        ticket
+                );
+            } else {
+                expense.setAmount(ticket.getAmount());
+            }
+            expenseService.save(expense);
+        } else if (ticket.getAmount() == 0 && expense != null) {
+            expense.setAmount(ticket.getAmount());
+            expenseService.save(expense);
+        }
 
         List<String> properties = DatabaseUtil.getColumnNames(entityManager, Ticket.class);
         Map<String, Pair<String,String>> changes = LogEntityChanges.trackChanges(originalTicket,currentTicket,properties);

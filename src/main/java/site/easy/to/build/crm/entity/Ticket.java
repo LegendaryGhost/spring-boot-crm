@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import site.easy.to.build.crm.api.POV;
@@ -59,7 +60,8 @@ public class Ticket {
     @OneToOne(mappedBy = "ticket")
     private Expense expense;
 
-    @Min(0)
+    @NotNull(message = "The amount cannot be null")
+    @Min(value = 0, message = "The amount must be superior or equal to 0")
     @Transient
     private double amount;
 
