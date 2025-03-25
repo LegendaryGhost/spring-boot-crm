@@ -22,7 +22,14 @@ public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
     """)
     List<Expense> findByCustomerId(@Param("customerId") int customerId);
 
-    @Query("SELECT COALESCE(SUM(e.amount), 0 ) FROM Expense e WHERE e.ticket.customer.customerId = :customerId OR e.lead.customer.customerId = :customerId")
+    @Query(value = """
+        SELECT COALESCE(SUM(te.amount), 0) + COALESCE(SUM(le.amount), 0) AS expense
+        FROM customer c
+        LEFT JOIN trigger_ticket t ON c.customer_id = t.customer_id
+        LEFT JOIN trigger_lead l ON c.customer_id = l.customer_id
+        LEFT JOIN expenses te ON t.ticket_id = te.ticket_id
+        LEFT JOIN expenses le ON l.lead_id = le.lead_id
+    """, nativeQuery = true)
     double findSumAmountByCustomerId(@Param("customerId") int customerId);
 
     @Query("SELECT e FROM Expense e WHERE e.ticket IS NOT NULL")
