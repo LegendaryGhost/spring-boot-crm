@@ -30,10 +30,6 @@ public class ExpenseService {
         return expenseRepository.findSumAmountByCustomerId(customerId);
     }
 
-    public double findTotalExpenseByBudgetId(int budgetId) {
-        return expenseRepository.findSumAmountByBudgetId(budgetId);
-    }
-
     public List<Expense> findAll() {
         return expenseRepository.findAll();
     }
@@ -61,11 +57,6 @@ public class ExpenseService {
 
     public double findTotalTicketExpense() {
         return expenseRepository.findSumAmountTicket();
-    }
-
-    @Transactional
-    public void deleteByBudgetId(int budgetId) {
-        expenseRepository.deleteByBudgetId(budgetId);
     }
 
     public Expense updateAmountById(int expenseId, double newAmount) {

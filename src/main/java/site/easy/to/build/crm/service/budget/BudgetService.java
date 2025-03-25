@@ -40,32 +40,35 @@ public class BudgetService {
         return budgetRepository.findById(budgetId).orElse(null);
     }
 
-    public void warnIfThresholdReached(RedirectAttributes redirectAttributes, Budget budget) {
-        // Show warning if the budget expense threshold was reached
-        double totalBudgetExpenses = expenseService.findTotalExpenseByBudgetId(budget.getId());
+    /**
+     // Show warning if the budget expense threshold was reached
+     * @param redirectAttributes redirect attributes
+     * @param customerId customer ID
+     */
+    public void warnIfThresholdReached(RedirectAttributes redirectAttributes, int customerId) {
+        double totalCustomerExpense = expenseService.findTotalExpenseByCustomerId(customerId);
+        double totalCustomerBudget = findTotalBudgetByCustomerId(customerId);
         double threshold = configurationService.getExpenseThreshold();
-        double thresholdAmount = budget.getAmount() * threshold / 100;
-        if (totalBudgetExpenses >= thresholdAmount) {
+        double thresholdAmount = totalCustomerBudget * threshold / 100;
+        if (totalCustomerExpense >= thresholdAmount) {
             redirectAttributes.addFlashAttribute("warning",
                     "The " + threshold + "% (" +
-                    numbers.formatDecimal(thresholdAmount, 1, "COMMA", 2, "POINT") + ") threshold was reached on the budget " + budget.getName()
+                    numbers.formatDecimal(thresholdAmount, 1, "COMMA", 2, "POINT") + ") threshold was reached for customer " + customerId
             );
         }
     }
 
-    public boolean isBudgetExceeded(int budgetId, double newExpense) {
-        Budget budget = budgetRepository.findById(budgetId)
-                .orElseThrow(() -> new IllegalArgumentException("Budget not found"));
-        double totalBudgetExpenses = expenseService.findTotalExpenseByBudgetId(budgetId);
-        return totalBudgetExpenses + newExpense > budget.getAmount();
+    public boolean isBudgetExceeded(int customerId, double newExpense) {
+        double totalCustomerBudget = budgetRepository.findSumAmountByCustomerId(customerId);
+        double totalCustomerId = expenseService.findTotalExpenseByCustomerId(customerId);
+        return totalCustomerId + newExpense > totalCustomerBudget;
     }
 
     public double findTotalCustomerBudget() {
         return budgetRepository.findSumAmount();
     }
 
-    public void deleteBudgetAndExpensesByBudgetId(int budgetId) {
-        expenseService.deleteByBudgetId(budgetId);
+    public void deleteById(int budgetId) {
         budgetRepository.deleteById(budgetId);
     }
 }

@@ -23,19 +23,18 @@ CREATE TABLE budgets
 
 CREATE TABLE expenses
 (
-    id           INT AUTO_INCREMENT,
-    amount       DECIMAL(15, 2) NOT NULL,
-    description  TEXT,
-    expense_date DATE           NOT NULL,
-    created_at   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    lead_id      INT UNSIGNED,
-    ticket_id    INT UNSIGNED,
-    budget_id    INT            NOT NULL,
-    PRIMARY KEY (id),
+    expense_id  INT AUTO_INCREMENT,
+    amount      DECIMAL(15, 2) NOT NULL,
+    description TEXT,
+    created_at  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    lead_id     INT UNSIGNED,
+    ticket_id   INT UNSIGNED,
+    PRIMARY KEY (expense_id),
+    UNIQUE (lead_id),
+    UNIQUE (ticket_id),
     FOREIGN KEY (lead_id) REFERENCES trigger_lead (lead_id),
-    FOREIGN KEY (ticket_id) REFERENCES trigger_ticket (ticket_id),
-    FOREIGN KEY (budget_id) REFERENCES budgets (budget_id)
+    FOREIGN KEY (ticket_id) REFERENCES trigger_ticket (ticket_id)
 );
 
 CREATE TABLE configuration
