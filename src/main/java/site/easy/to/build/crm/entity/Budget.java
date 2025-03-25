@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import site.easy.to.build.crm.api.POV;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -26,14 +25,6 @@ public class Budget {
     @Column(name = "amount")
     @JsonView(POV.Budget.class)
     private Double amount;
-
-    @Column(name = "start_date")
-    @JsonView(POV.Budget.class)
-    private LocalDate startDate;
-
-    @Column(name = "end_date")
-    @JsonView(POV.Budget.class)
-    private LocalDate endDate;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     @JsonView(POV.Budget.class)
