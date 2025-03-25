@@ -3,9 +3,11 @@ package site.easy.to.build.crm.service.budget;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.easy.to.build.crm.api.dto.ExpenseTypeDTO;
 import site.easy.to.build.crm.entity.Expense;
 import site.easy.to.build.crm.repository.ExpenseRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -68,5 +70,22 @@ public class ExpenseService {
         Expense expense = findById(expenseId);
         expense.setAmount(newAmount);
         return expenseRepository.save(expense);
+    }
+
+    public List<ExpenseTypeDTO> findExpensesPerType() {
+        List<ExpenseTypeDTO> types = new ArrayList<>();
+        types.add(
+                new ExpenseTypeDTO(
+                        "Tickets",
+                        findTotalTicketExpense()
+                )
+        );
+        types.add(
+                new ExpenseTypeDTO(
+                        "Leads",
+                        findTotalLeadExpense()
+                )
+        );
+        return types;
     }
 }

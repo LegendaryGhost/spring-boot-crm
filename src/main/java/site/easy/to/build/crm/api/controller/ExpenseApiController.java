@@ -29,6 +29,7 @@ public class ExpenseApiController {
                 budgetService.findTotalCustomerBudget(),
                 expenseService.findTotalLeadExpense(),
                 expenseService.findTotalTicketExpense(),
+                expenseService.findExpensesPerType(),
                 expenseService.findAll(),
                 expenseService.findAllLeadsExpenses(),
                 expenseService.findAllTicketsExpenses()
