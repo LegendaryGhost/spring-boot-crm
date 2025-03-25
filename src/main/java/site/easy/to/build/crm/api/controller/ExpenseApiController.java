@@ -96,7 +96,7 @@ public class ExpenseApiController {
     public ResponseEntity<ApiResponse<?>> delete(@PathVariable(name = "id") int expenseId) {
         ApiResponse<?> response;
         expenseService.deleteById(expenseId);
-        response = new ApiOkResponse<>("Data efface", expenseId);
+        response = new ApiOkResponse<>("Expense deleted", expenseId);
         return ResponseEntity.ok(response);
     }
 }
