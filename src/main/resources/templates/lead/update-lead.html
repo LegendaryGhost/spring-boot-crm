@@ -124,7 +124,27 @@
                                     <input type="checkbox" class="custom-control-input trigger-emails" th:id="googleDrive" th:field="*{googleDrive}">
                                     <label th:for="googleDrive" class="custom-control-label">Upload Docs to your Google Drive</label>
                                 </div>
-                                <button type="submit" class="btn btn-primary m-t-20">update Lead</button>
+
+                                <label class="m-t-20" for="amount">Amount:</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" id="amount" name="amount" class="form-control">
+                                </div>
+                                <div class="input-group">
+                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></span>
+                                </div>
+
+                                <div th:if="${confirm}" class="mt-4 alert alert-danger d-flex align-items-center" role="alert">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <div th:text="${confirm}"></div>
+                                </div>
+
+                                <input th:if="${confirm}" type="hidden" th:field="*{confirm}">
+
+                                <button type="submit" class="btn btn-primary m-t-20"
+                                        th:text="${confirm != null} ? 'Confirm' : 'Update lead'">
+                                    Update lead
+                                </button>
+                                <a th:if="${confirm != null}" th:href="@{/}" class="btn btn-secondary m-t-20">Cancel</a>
                             </form>
                         </div>
                     </div>

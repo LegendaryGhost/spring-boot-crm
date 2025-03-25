@@ -95,4 +95,8 @@ public class ExpenseService {
     public Expense findByTicketId(int ticketId) {
         return expenseRepository.findByTicketId(ticketId);
     }
+
+    public Expense findByLeadId(int leadId) {
+        return expenseRepository.findByLeadId(leadId);
+    }
 }

@@ -152,7 +152,7 @@
                                 <input th:if="${confirm}" type="hidden" th:field="*{confirm}">
 
                                 <button type="submit" class="btn btn-primary m-t-20"
-                                        th:text="${confirm != null} ? 'Confirm' : 'Create expense'">
+                                        th:text="${confirm != null} ? 'Confirm' : 'Create ticket'">
                                     Create ticket
                                 </button>
                                 <a th:if="${confirm != null}" th:href="@{/}" class="btn btn-secondary m-t-20">Cancel</a>

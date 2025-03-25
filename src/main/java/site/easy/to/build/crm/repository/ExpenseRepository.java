@@ -29,6 +29,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
         LEFT JOIN trigger_lead l ON c.customer_id = l.customer_id
         LEFT JOIN expenses te ON t.ticket_id = te.ticket_id
         LEFT JOIN expenses le ON l.lead_id = le.lead_id
+        WHERE c.customer_id = :customerId
     """, nativeQuery = true)
     double findSumAmountByCustomerId(@Param("customerId") int customerId);
 
@@ -60,4 +61,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
 
     @Query("SELECT e FROM Expense e WHERE e.ticket.ticketId = :ticketId")
     Expense findByTicketId(@Param("ticketId") int ticketId);
+
+    @Query("SELECT e FROM Expense e WHERE e.lead.leadId = :leadId")
+    Expense findByLeadId(@Param("leadId") int leadId);
 }

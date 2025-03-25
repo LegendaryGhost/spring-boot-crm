@@ -2,7 +2,9 @@ package site.easy.to.build.crm.entity;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import site.easy.to.build.crm.api.POV;
@@ -67,6 +69,17 @@ public class Lead {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @OneToOne(mappedBy = "lead")
+    private Expense expense;
+
+    @NotNull(message = "The amount cannot be null")
+    @Min(value = 0, message = "The amount must be superior or equal to 0")
+    @Transient
+    private double amount;
+
+    @Transient
+    private String confirm;
 
     public Lead() {
     }
