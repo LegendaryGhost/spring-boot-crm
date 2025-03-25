@@ -1,6 +1,7 @@
 package site.easy.to.build.crm.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -31,4 +32,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
 
     @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.ticket IS NOT NULL")
     double findSumAmountTicket();
+
+    @Modifying
+    @Query("DELETE FROM Expense e WHERE e.budget.id = :budgetId")
+    void deleteByBudgetId(@Param("budgetId") int budgetId);
 }

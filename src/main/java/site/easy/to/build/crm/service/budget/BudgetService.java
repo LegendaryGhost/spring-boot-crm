@@ -5,11 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.expression.Numbers;
 import site.easy.to.build.crm.entity.Budget;
-import site.easy.to.build.crm.entity.Expense;
 import site.easy.to.build.crm.repository.BudgetRepository;
 import site.easy.to.build.crm.service.configuration.ConfigurationService;
 
-import javax.validation.constraints.Min;
 import java.util.List;
 import java.util.Locale;
 
@@ -64,5 +62,10 @@ public class BudgetService {
 
     public double findTotalCustomerBudget() {
         return budgetRepository.findSumAmount();
+    }
+
+    public void deleteBudgetAndExpensesByBudgetId(int budgetId) {
+        expenseService.deleteByBudgetId(budgetId);
+        budgetRepository.deleteById(budgetId);
     }
 }
