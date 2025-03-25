@@ -46,16 +46,29 @@ public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
     double findSumAmountTicket();
 
     @Query(value = """
-        SELECT c.name AS customerName,
-               COALESCE(SUM(b.amount), 0) AS budget,
-               COALESCE(SUM(te.amount), 0) + COALESCE(SUM(le.amount), 0) AS expense
+        SELECT
+            c.name AS customerName,
+            COALESCE(b.totalBudget, 0) AS budget,
+            COALESCE(e.totalExpense, 0) AS expense
         FROM customer c
-        LEFT JOIN budgets b ON c.customer_id = b.customer_id
-        LEFT JOIN trigger_ticket t ON c.customer_id = t.customer_id
-        LEFT JOIN trigger_lead l ON c.customer_id = l.customer_id
-        LEFT JOIN expenses te ON t.ticket_id = te.ticket_id
-        LEFT JOIN expenses le ON l.lead_id = le.lead_id
-        GROUP BY c.name
+        LEFT JOIN (
+            SELECT customer_id, SUM(amount) AS totalBudget
+            FROM budgets
+            GROUP BY customer_id
+        ) b ON c.customer_id = b.customer_id
+        LEFT JOIN (
+            SELECT customer_id, SUM(amount) AS totalExpense
+            FROM (
+                SELECT t.customer_id, te.amount
+                FROM trigger_ticket t
+                JOIN expenses te ON t.ticket_id = te.ticket_id
+                UNION ALL
+                SELECT l.customer_id, le.amount
+                FROM trigger_lead l
+                JOIN expenses le ON l.lead_id = le.lead_id
+            ) sub
+            GROUP BY customer_id
+        ) e ON c.customer_id = e.customer_id;
     """, nativeQuery = true)
     List<Object[]> findExpensesByCustomer();
 
