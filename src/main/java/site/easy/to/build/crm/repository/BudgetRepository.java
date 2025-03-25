@@ -16,4 +16,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Integer> {
 
     @Query("SELECT b FROM Budget b WHERE b.customer.customerId = :customerId")
     List<Budget> findByCustomerId(@Param("customerId") int customerId);
+
+    @Query("SELECT COALESCE(SUM(b.amount), 0.0) FROM  Budget b")
+    double findSumAmount();
 }

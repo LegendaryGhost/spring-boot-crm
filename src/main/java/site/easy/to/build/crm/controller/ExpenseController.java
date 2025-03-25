@@ -1,6 +1,5 @@
 package site.easy.to.build.crm.controller;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +12,6 @@ import site.easy.to.build.crm.dto.TicketExpenseForm;
 import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.service.budget.ExpenseService;
 import site.easy.to.build.crm.service.budget.BudgetService;
-import site.easy.to.build.crm.service.configuration.ConfigurationService;
 import site.easy.to.build.crm.service.customer.CustomerServiceImpl;
 import site.easy.to.build.crm.service.lead.LeadServiceImpl;
 import site.easy.to.build.crm.service.ticket.TicketServiceImpl;
@@ -85,6 +83,7 @@ public class ExpenseController {
         expense.setAmount(ticketExpenseForm.getAmount());
         expense.setDescription(ticketExpenseForm.getDescription());
         expense.setExpenseDate(ticket.getCreatedAt().toLocalDate());
+
 
         expenseService.save(expense);
 
@@ -159,7 +158,7 @@ public class ExpenseController {
         }
 
         double customerTotalExpense = expenseService.findTotalExpenseByCustomerId(customerId);
-        List<Expense> expenses = expenseService.findByCutomerId(customerId);
+        List<Expense> expenses = expenseService.findByCustomerId(customerId);
 
         model.addAttribute("customerTotalExpense", customerTotalExpense);
         model.addAttribute("expenses", expenses);

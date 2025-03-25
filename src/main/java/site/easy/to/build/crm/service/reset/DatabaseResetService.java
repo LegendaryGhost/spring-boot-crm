@@ -17,7 +17,8 @@ public class DatabaseResetService {
         String[] tablesToClear = {
                 "contract_settings", "customer", "email_template", "employee", "file",
                 "google_drive_file", "lead_action", "lead_settings", "ticket_settings",
-                "trigger_contract", "trigger_lead", "trigger_ticket", "user_profile"
+                "trigger_contract", "trigger_lead", "trigger_ticket", "user_profile",
+                "budgets", "expenses"
         };
 
         // Disable foreign key checks to avoid constraint violations

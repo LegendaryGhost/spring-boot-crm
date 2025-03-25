@@ -1,9 +1,11 @@
 package site.easy.to.build.crm.entity;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.mapping.ToOne;
+import site.easy.to.build.crm.api.POV;
 
 import java.time.LocalDateTime;
 
@@ -13,10 +15,12 @@ public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ticket_id")
+    @JsonView(POV.TicketExpense.class)
     private int ticketId;
 
     @Column(name = "subject")
     @NotBlank(message = "Subject is required")
+    @JsonView(POV.TicketExpense.class)
     private String subject;
 
     @Column(name = "description")
@@ -25,6 +29,7 @@ public class Ticket {
     @Column(name = "status")
     @NotBlank(message = "Status is required")
     @Pattern(regexp = "^(open|assigned|on-hold|in-progress|resolved|closed|reopened|pending-customer-response|escalated|archived)$", message = "Invalid status")
+    @JsonView(POV.TicketExpense.class)
     private String status;
 
     @Column(name = "priority")
@@ -43,6 +48,7 @@ public class Ticket {
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
+    @JsonView(POV.TicketExpense.class)
     private Customer customer;
 
     @Column(name = "created_at")
