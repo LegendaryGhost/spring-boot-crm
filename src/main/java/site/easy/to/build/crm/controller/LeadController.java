@@ -16,6 +16,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.expression.Numbers;
 import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.entity.settings.LeadEmailSettings;
 import site.easy.to.build.crm.google.model.calendar.EventDisplay;
@@ -25,6 +27,8 @@ import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.calendar.GoogleCalendarApiService;
 import site.easy.to.build.crm.google.service.drive.GoogleDriveApiService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
+import site.easy.to.build.crm.service.budget.BudgetService;
+import site.easy.to.build.crm.service.budget.ExpenseService;
 import site.easy.to.build.crm.service.customer.CustomerService;
 import site.easy.to.build.crm.service.drive.GoogleDriveFileService;
 import site.easy.to.build.crm.service.file.FileService;
@@ -60,12 +64,16 @@ public class LeadController {
     private final LeadEmailSettingsService leadEmailSettingsService;
     private final GoogleGmailApiService googleGmailApiService;
     private final EntityManager entityManager;
+    private final BudgetService budgetService;
+
+    private final Numbers numbers = new Numbers(Locale.FRANCE);
+    private final ExpenseService expenseService;
 
     @Autowired
     public LeadController(LeadService leadService, AuthenticationUtils authenticationUtils, UserService userService, CustomerService customerService,
                           LeadActionService leadActionService, GoogleCalendarApiService googleCalendarApiService, FileService fileService,
                           GoogleDriveApiService googleDriveApiService, GoogleDriveFileService googleDriveFileService, FileUtil fileUtil,
-                          LeadEmailSettingsService leadEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager) {
+                          LeadEmailSettingsService leadEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager, BudgetService budgetService, ExpenseService expenseService) {
         this.leadService = leadService;
         this.authenticationUtils = authenticationUtils;
         this.userService = userService;
@@ -79,6 +87,8 @@ public class LeadController {
         this.leadEmailSettingsService = leadEmailSettingsService;
         this.googleGmailApiService = googleGmailApiService;
         this.entityManager = entityManager;
+        this.budgetService = budgetService;
+        this.expenseService = expenseService;
     }
 
     @GetMapping("/show/{id}")
@@ -168,7 +178,7 @@ public class LeadController {
     public String createLead(@ModelAttribute("lead") @Validated Lead lead, BindingResult bindingResult,
                              @RequestParam("customerId") int customerId, @RequestParam("employeeId") int employeeId,
                              Authentication authentication, @RequestParam("allFiles")@Nullable String files,
-                             @RequestParam("folderId") @Nullable String folderId, Model model) throws JsonProcessingException {
+                             @RequestParam("folderId") @Nullable String folderId, Model model, RedirectAttributes redirectAttributes) throws JsonProcessingException {
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User manager = userService.findById(userId);
@@ -208,7 +218,32 @@ public class LeadController {
             }
         }
 
+        if (lead.getConfirm() == null && budgetService.isBudgetExceeded(customerId, lead.getAmount())) {
+            User user = userService.findById(userId);
+            populateModelAttributes(model, authentication, user);
+
+            double totalCustomerBudget = budgetService.findTotalBudgetByCustomerId(customerId);
+
+            model.addAttribute("lead", lead);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(totalCustomerBudget, 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
+            return "lead/create-lead";
+        }
+
         Lead createdLead = leadService.save(lead);
+
+        if (lead.getAmount() > 0) {
+            Expense expense = new Expense(
+                    lead.getAmount(),
+                    lead.getName(),
+                    lead
+            );
+            expenseService.save(expense);
+        }
+
+        budgetService.warnIfThresholdReached(redirectAttributes, customerId);
+
         fileUtil.saveFiles(allFiles, createdLead);
 
         if (lead.getGoogleDrive() != null) {
@@ -303,7 +338,7 @@ public class LeadController {
     @PostMapping("/update")
     public String updateLead(@ModelAttribute("lead") @Validated Lead lead, BindingResult bindingResult, @RequestParam("customerId") int customerId,
                              @RequestParam("employeeId") int employeeId, Authentication authentication, Model model,
-                             @RequestParam("allFiles") @Nullable String files, @RequestParam("folderId") @Nullable String folderId) throws JsonProcessingException {
+                             @RequestParam("allFiles") @Nullable String files, @RequestParam("folderId") @Nullable String folderId, RedirectAttributes redirectAttributes) throws JsonProcessingException {
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User loggedInUser = userService.findById(userId);
@@ -430,7 +465,95 @@ public class LeadController {
             }
             fileUtil.saveGoogleDriveFiles(authentication,allFiles,folderId,lead);
         }
+
+        if (lead.getConfirm() == null && budgetService.isBudgetExceeded(customerId, lead.getAmount())) {
+            List<User> employees = new ArrayList<>();
+            List<Customer> customers = new ArrayList<>();
+
+            if(AuthorizationUtil.hasRole(authentication, "ROLE_MANAGER")) {
+                employees = userService.findAll();
+                customers = customerService.findAll();
+            } else {
+                employees.add(loggedInUser);
+                //In case Employee's manager assign lead for the employee with a customer that's not created by this employee
+                //As a result of that the employee mustn't change the customer
+                if(!Objects.equals(employee.getId(), lead.getManager().getId())) {
+                    customers.add(lead.getCustomer());
+                } else {
+                    customers = customerService.findByUserId(loggedInUser.getId());
+                }
+            }
+            Lead tempLead = leadService.findByLeadId(lead.getLeadId());
+            lead.setEmployee(tempLead.getEmployee());
+            lead.setManager(tempLead.getManager());
+            lead.setLeadActions(tempLead.getLeadActions());
+            lead.setCustomer(tempLead.getCustomer());
+            List<File> filesArray = tempLead.getFiles();
+
+            List<Attachment> attachments = new ArrayList<>();
+            for (File file : filesArray) {
+                String base64Data = Base64.getEncoder().encodeToString(file.getFileData());
+                Attachment attachment = new Attachment(file.getFileName(), base64Data, file.getFileType());
+                attachments.add(attachment);
+            }
+
+            List<GoogleDriveFolder> folders = null;
+
+            boolean hasGoogleDriveAccess = false;
+            if (!(authentication instanceof UsernamePasswordAuthenticationToken) && googleDriveApiService != null) {
+                OAuthUser oAuthUser = authenticationUtils.getOAuthUserFromAuthentication(authentication);
+                List<GoogleDriveFile> googleDriveFiles = tempLead.getGoogleDriveFiles();
+                try {
+                    hasGoogleDriveAccess = authenticationUtils.checkIfAppHasAccess(GoogleAccessService.SCOPE_DRIVE, oAuthUser);
+                    if (hasGoogleDriveAccess) {
+                        folders = googleDriveApiService.listFolders(oAuthUser);
+                    }
+
+                    // Check if the file got deleted using his Google Drive
+                    fileUtil.updateFilesBasedOnGoogleDriveFiles(oAuthUser,googleDriveFiles,tempLead);
+
+                } catch (IOException | GeneralSecurityException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            model.addAttribute("employees", employees);
+            model.addAttribute("customers", customers);
+            model.addAttribute("attachments", attachments);
+            model.addAttribute("folders", folders);
+            model.addAttribute("hasGoogleDriveAccess",hasGoogleDriveAccess);
+
+            User user = userService.findById(userId);
+            populateModelAttributes(model, authentication, user);
+
+            double totalCustomerBudget = budgetService.findTotalBudgetByCustomerId(customerId);
+
+            model.addAttribute("lead", lead);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(totalCustomerBudget, 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
+            return "lead/update-lead";
+        }
+
         Lead CurrentLead = leadService.save(lead);
+
+        Expense expense = expenseService.findByLeadId(lead.getLeadId());
+        if (lead.getAmount() > 0) {
+            if (expense == null) {
+                expense = new Expense(
+                        lead.getAmount(),
+                        lead.getName(),
+                        lead
+                );
+            } else {
+                expense.setAmount(lead.getAmount());
+            }
+            expenseService.save(expense);
+        } else if (lead.getAmount() == 0 && expense != null) {
+            expense.setAmount(lead.getAmount());
+            expenseService.save(expense);
+        }
+
+        budgetService.warnIfThresholdReached(redirectAttributes, customerId);
         saveLeadActions(lead, prevLead);
         List<String> properties = DatabaseUtil.getColumnNames(entityManager, Lead.class);
         Map<String, Pair<String ,String>> changes = LogEntityChanges.trackChanges(originalLead,CurrentLead, properties);

@@ -14,8 +14,6 @@ public class LeadExpenseForm {
 
     private String description;
 
-    private int budgetId;
-
     private String confirm;
 
     public LeadExpenseForm(int leadId) {

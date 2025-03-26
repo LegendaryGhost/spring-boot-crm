@@ -27,7 +27,7 @@ public class BudgetApiController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> delete(@PathVariable(name = "id") int budgetId) {
-        budgetService.deleteBudgetAndExpensesByBudgetId(budgetId);
+        budgetService.deleteById(budgetId);
         ApiResponse<?> response = new ApiOkResponse<>("Budget and related expenses deleted", budgetId);
         return ResponseEntity.ok(response);
     }

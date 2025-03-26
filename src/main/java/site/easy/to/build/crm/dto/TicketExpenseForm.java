@@ -14,8 +14,6 @@ public class TicketExpenseForm {
 
     private String description;
 
-    private int budgetId;
-
     private String confirm;
 
     public TicketExpenseForm(int ticketId) {

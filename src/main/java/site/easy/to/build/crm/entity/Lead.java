@@ -2,13 +2,17 @@ package site.easy.to.build.crm.entity;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.Data;
 import site.easy.to.build.crm.api.POV;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
 @Entity
 @Table(name = "trigger_lead")
 public class Lead {
@@ -66,6 +70,17 @@ public class Lead {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @OneToOne(mappedBy = "lead", cascade = CascadeType.REMOVE)
+    private Expense expense;
+
+    @NotNull(message = "The amount cannot be null")
+    @Min(value = 0, message = "The amount must be superior or equal to 0")
+    @Transient
+    private double amount;
+
+    @Transient
+    private String confirm;
+
     public Lead() {
     }
 
@@ -87,76 +102,12 @@ public class Lead {
         this.createdAt = createdAt;
     }
 
-    public int getLeadId() {
-        return leadId;
-    }
-
-    public void setLeadId(int leadId) {
-        this.leadId = leadId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getMeetingId() {
-        return meetingId;
-    }
-
-    public Boolean getGoogleDrive() {
-        return googleDrive;
-    }
-
-    public void setGoogleDrive(Boolean googleDrive) {
-        this.googleDrive = googleDrive;
-    }
-
-    public String getGoogleDriveFolderId() {
-        return googleDriveFolderId;
-    }
-
-    public void setGoogleDriveFolderId(String googleDriveFolderId) {
-        this.googleDriveFolderId = googleDriveFolderId;
-    }
-
-    public void setMeetingId(String meetingId) {
-        this.meetingId = meetingId;
-    }
-
-    public List<LeadAction> getLeadActions() {
-        return leadActions;
-    }
-
     public void addLeadAction(LeadAction leadAction) {
         this.leadActions.add(leadAction);
     }
 
     public void removeLeadAction(LeadAction leadAction) {
         this.leadActions.remove(leadAction);
-    }
-
-    public List<File> getFiles() {
-        return files;
     }
 
     public void addFile(File file) {
@@ -176,53 +127,6 @@ public class Lead {
         this.googleDriveFiles.remove(googleDriveFile);
     }
 
-    public List<GoogleDriveFile> getGoogleDriveFiles() {
-        return googleDriveFiles;
-    }
-
-    public void setGoogleDriveFiles(List<GoogleDriveFile> googleDriveFiles) {
-        this.googleDriveFiles = googleDriveFiles;
-    }
-
-    public User getManager() {
-        return manager;
-    }
-
-    public void setManager(User manager) {
-        this.manager = manager;
-    }
-
-    public User getEmployee() {
-        return employee;
-    }
-
-    public void setEmployee(User employee) {
-        this.employee = employee;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-    public void setFiles(List<File> files) {
-        this.files = files;
-    }
-
-    public void setLeadActions(List<LeadAction> leadActions) {
-        this.leadActions = leadActions;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }
 
 

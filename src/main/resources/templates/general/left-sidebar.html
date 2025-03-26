@@ -20,7 +20,7 @@
                         </li>
                         <li>
                             <form th:action="@{/logout}" method="post">
-                                <button type="submit"><i class="fa fa-power-off"></i> Logout</button>
+                                <button type="submit" class="btn btn-danger"><i class="fa fa-power-off"></i> Logout</button>
                             </form>
                         </li>
                     </ul>
@@ -93,7 +93,7 @@
                         <span class="hide-menu">Import data</span>
                     </a>
                     <ul th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}" class="collapse">
-                        <li><a th:href="${home + 'manager/import/users'}">Import users</a></li>
+                        <li><a th:href="${home + 'import/csv/all'}">Import data</a></li>
                     </ul>
                 </li>
                 <li th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}" class="nav-small-cap">--- Users</li>

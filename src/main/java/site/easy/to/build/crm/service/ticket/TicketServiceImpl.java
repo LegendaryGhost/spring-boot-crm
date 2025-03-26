@@ -3,6 +3,7 @@ package site.easy.to.build.crm.service.ticket;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.repository.TicketRepository;
 import site.easy.to.build.crm.entity.Ticket;
@@ -90,4 +91,13 @@ public class TicketServiceImpl implements TicketService{
     public void deleteAllByCustomer(Customer customer) {
         ticketRepository.deleteAllByCustomer(customer);
     }
+
+    public Integer getTicketIdByExpenseId(int expenseId) {
+        return ticketRepository.findTicketIdByExpenseId(expenseId);
+    }
+
+    public void deleteById(Integer ticketId) {
+        ticketRepository.deleteById(ticketId);
+    }
+
 }

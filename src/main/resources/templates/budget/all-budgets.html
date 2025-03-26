@@ -82,8 +82,7 @@
                                         <th>#</th>
                                         <th>Name</th>
                                         <th>Amount</th>
-                                        <th>Start date</th>
-                                        <th>End date</th>
+                                        <th>Creation date</th>
                                         <th>Customer</th>
                                     </tr>
                                     </thead>
@@ -92,8 +91,7 @@
                                         <td th:text="${budget.id}"></td>
                                         <td th:text="${budget.name}"></td>
                                         <td th:text="${#numbers.formatDecimal(budget.amount, 1, 'COMMA', 2, 'POINT')}"></td>
-                                        <td th:text="${#temporals.format(budget.startDate, 'dd-MM-yyyy')}"></td>
-                                        <td th:text="${#temporals.format(budget.endDate, 'dd-MM-yyyy')}"></td>
+                                        <td th:text="${#temporals.format(budget.createdAt, 'dd-MM-yyyy')}"></td>
                                         <td th:text="${budget.customer.name}"></td>
                                     </tr>
                                     </tbody>
