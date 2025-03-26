@@ -10,7 +10,7 @@ CREATE TABLE temp_users
 CREATE TABLE budgets
 (
     budget_id   INT AUTO_INCREMENT,
-    budget_name VARCHAR(255)   NOT NULL,
+    budget_name VARCHAR(255)   NOT NULL DEFAULT '',
     amount      DECIMAL(15, 2) NOT NULL,
     created_at  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
