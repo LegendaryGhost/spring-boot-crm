@@ -21,7 +21,7 @@ public class DuplicationService {
 
 
     public Resource generateCustomerCsvFile(Customer customer, List<Budget> budgets, List<Ticket> tickets, List<Lead> leads) throws IOException {
-        String headers = "username,email,type,subject,amount,status";
+        String headers = "username,email,country,phone,type,subject_name,amount,status,description_phone";
         String customerCsvString = getCustomerCsvString(customer);
         StringBuilder content = new StringBuilder(headers + "\n");
 
@@ -49,11 +49,11 @@ public class DuplicationService {
     }
 
     private String getTicketCsvString(Ticket ticket) {
-        return "\"ticket\",\"" + ticket.getSubject() + "\"," + ticket.getExpense().getAmount() + ",\"" + ticket.getStatus() + "\"";
+        return "\"ticket\",\"" + ticket.getSubject() + "\"," + ticket.getExpense().getAmount() + ",\"" + ticket.getStatus() + "\"," + ticket.getDescription();
     }
 
     private String getLeadCsvString(Lead lead) {
-        return "\"lead\",\"" + lead.getName() + "\"," + lead.getExpense().getAmount() + ",\"" + lead.getStatus() + "\"";
+        return "\"lead\",\"" + lead.getName() + "\"," + lead.getExpense().getAmount() + ",\"" + lead.getStatus() + "\"," + lead.getPhone();
     }
 
     private String getBudgetCsvString(Budget budget) {
@@ -61,6 +61,6 @@ public class DuplicationService {
     }
 
     private String getCustomerCsvString(Customer customer) {
-        return "\"" + customer.getName() + " copy\",\"copy_" + customer.getEmail() + "\"";
+        return "\"" + customer.getName() + " copy\",\"copy_" + customer.getEmail() + "\"," + "\"" + customer.getCountry() + "\",\"" + customer.getPhone() + "\"";
     }
 }
