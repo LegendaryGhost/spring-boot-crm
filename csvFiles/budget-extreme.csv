@@ -4,7 +4,7 @@ mail2@test.com,450000
 customer1@yopmail.com,350000
 verylongemailaddressthatisoverthelimit@example.com,1000000000
 short@em.com,100
-missingemail,,500000
+missingemail,500000
 ,
 invalidemail@com,200000
 customer3@yopmail.com,not_a_number

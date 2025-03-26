@@ -3,6 +3,7 @@ package site.easy.to.build.crm.csv.dto;
 import com.opencsv.bean.CsvBindByName;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class BudgetCsvDto {
     private String customer_email;
 
     @NotBlank(message = "'budgetStr' cannot be blank")
+    @Pattern(regexp = "^[+-]?(?:[0-9]+(?:[.,][0-9]+)?|[.,][0-9]+)$", message = "Invalid number format")
     @CsvBindByName(column = "Budget")
     private String budgetStr;
 

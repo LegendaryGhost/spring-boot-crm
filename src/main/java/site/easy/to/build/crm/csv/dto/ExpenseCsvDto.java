@@ -27,6 +27,7 @@ public class ExpenseCsvDto {
     private String status;
 
     @NotBlank(message = "'expenseStr' cannot be blank")
+    @Pattern(regexp = "^[+-]?(?:[0-9]+(?:[.,][0-9]+)?|[.,][0-9]+)$", message = "Invalid number format")
     @CsvBindByName(column = "expense")
     private String expenseStr;
 
@@ -35,10 +36,13 @@ public class ExpenseCsvDto {
 
     // Custom setter for expense to handle comma replacement
     public void setExpenseStr(String expense) {
-        if (expense.contains(",")) {
-            this.expense = Double.parseDouble(expense.replace(",", "."));
-        } else {
-            this.expense = Double.parseDouble(expense);
+        try {
+            if (expense.contains(",")) {
+                this.expense = Double.parseDouble(expense.replace(",", "."));
+            } else {
+                this.expense = Double.parseDouble(expense);
+            }
+        } catch (NumberFormatException ignored) {
         }
         this.expenseStr = expense;
     }
