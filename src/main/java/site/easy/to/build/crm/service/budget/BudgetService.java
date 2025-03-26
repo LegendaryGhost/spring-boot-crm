@@ -91,6 +91,13 @@ public class BudgetService {
         budgetRepository.deleteById(budgetId);
     }
 
+    public Budget updateAmountById(Integer budgetId, double newAmount) {
+        Budget budget = findById(budgetId);
+        budget.setAmount(newAmount);
+        return budgetRepository.save(budget);
+    }
+
+    // batch
     @Transactional
     public void saveBatch(List<Budget> budgets, Integer batchSize) {
         String sql = "INSERT INTO budgets (created_at, amount, customer_id) VALUES (?, ?, ?)";
