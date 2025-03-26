@@ -1,12 +1,18 @@
 package site.easy.to.build.crm.service.data;
 
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import site.easy.to.build.crm.entity.Budget;
 import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.entity.Lead;
 import site.easy.to.build.crm.entity.Ticket;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @AllArgsConstructor
@@ -14,7 +20,7 @@ import java.util.List;
 public class DuplicationService {
 
 
-    public void generateCustomerCsvFile(Customer customer, List<Budget> budgets, List<Ticket> tickets, List<Lead> leads) {
+    public Resource generateCustomerCsvFile(Customer customer, List<Budget> budgets, List<Ticket> tickets, List<Lead> leads) throws IOException {
         String headers = "username,email,type,subject,amount,status";
         String customerCsvString = getCustomerCsvString(customer);
         StringBuilder content = new StringBuilder(headers + "\n");
@@ -34,7 +40,12 @@ public class DuplicationService {
             content.append(customerCsvString).append(",").append(budgetCsvString).append("\n");
         }
 
-        System.out.println(content);
+        Path filePath = Paths.get("customer.csv");
+        if (!filePath.toFile().exists()) {
+            Files.createFile(filePath);
+        }
+        Files.write(filePath, content.toString().getBytes());
+        return new UrlResource(filePath.toUri());
     }
 
     private String getTicketCsvString(Ticket ticket) {

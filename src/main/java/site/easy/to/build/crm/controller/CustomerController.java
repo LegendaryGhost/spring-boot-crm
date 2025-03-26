@@ -2,6 +2,9 @@ package site.easy.to.build.crm.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -27,6 +30,9 @@ import site.easy.to.build.crm.util.AuthenticationUtils;
 import site.easy.to.build.crm.util.AuthorizationUtil;
 import site.easy.to.build.crm.util.EmailTokenUtils;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -46,6 +52,7 @@ public class CustomerController {
     private final BudgetService budgetService;
     private final ExpenseService expenseService;
     private final DuplicationService duplicationService;
+    private final Path fileStorageLocation = Paths.get("C:\\uploads");
 
     @Autowired
     public CustomerController(CustomerService customerService, UserService userService, CustomerLoginInfoService customerLoginInfoService,
@@ -138,18 +145,24 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}/duplicate")
-    public String duplicateCustomer(@PathVariable("id") int customerId) {
+    public ResponseEntity<?> duplicateCustomer(@PathVariable("id") int customerId) {
         Customer customer = customerService.findByCustomerId(customerId);
         if (customer == null) {
-            return "error/not-found";
+            return ResponseEntity.notFound().build();
         }
         List<Budget> budgets = budgetService.findByCustomerId(customerId);
         List<Ticket> tickets = ticketService.findCustomerTickets(customerId);
         List<Lead> leads = leadService.findCustomerLeads(customerId);
 
-        duplicationService.generateCustomerCsvFile(customer, budgets, tickets, leads);
-
-        return "redirect:/employee/customer/my-customers";
+        try {
+            Resource resource = duplicationService.generateCustomerCsvFile(customer, budgets, tickets, leads);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
 
