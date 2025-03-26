@@ -15,7 +15,7 @@ public class CustomerCsvDto {
     private String customer_email;
 
     @NotBlank(message = "'customer_name' cannot be blank")
-    @Size(max = 255, message = "'customer_customer_nameemail' must be less than 255 characters")
+    @Size(max = 255, message = "'customer_customer_name' must be less than 255 characters")
     @CsvBindByName(column = "customer_name")
     private String customer_name;
 }

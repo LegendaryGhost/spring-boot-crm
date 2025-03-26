@@ -1,5 +1,6 @@
 package site.easy.to.build.crm.service.budget;
 
+import com.fasterxml.jackson.databind.util.LinkedNode;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @Service
@@ -36,6 +38,25 @@ public class ExpenseService {
 
     private final GenericCsvService<ExpenseCsvDto, Expense> genericCsvService;
     private final JdbcTemplate jdbcTemplate;
+    private final Set<String> ticketStatus = Set.of(
+            "open",
+            "assigned",
+            "on-hold",
+            "in-progress",
+            "resolved",
+            "closed",
+            "reopened",
+            "pending-customer-response",
+            "escalated",
+            "archived"
+    );
+    private final Set<String> leadStatus = Set.of(
+            "meeting-to-schedule",
+            "scheduled",
+            "archived",
+            "success",
+            "assign-to-sales"
+    );
 
     public Expense save(Expense expense) {
         return expenseRepository.save(expense);
@@ -194,10 +215,17 @@ public class ExpenseService {
 //        }
 
         if (csvDto.getType().equals("ticket")) {
+            String status = csvDto.getStatus();
+            if (!this.ticketStatus.contains(status)) {
+                String message = "Status '" + status + "' incompatible for type ticket!";
+                errors.add(new CsvErrorWrapper(filename, rowIndex, message, csvDto.toString()));
+                return expense;
+            }
+
             Ticket ticket = new Ticket();
             ticket.setCustomer(customer);
             ticket.setManager(user);
-            ticket.setEmployee(null);
+            ticket.setEmployee(user);
             ticket.setSubject(csvDto.getSubject_or_name());
             ticket.setStatus(csvDto.getStatus());
             ticket.setPriority("low");
@@ -206,10 +234,17 @@ public class ExpenseService {
             ticketRepository.save(ticket);
 
         } else if (csvDto.getType().equals("lead")) {
+            String status = csvDto.getStatus();
+            if (!this.leadStatus.contains(status)) {
+                String message = "Status '" + status + "' incompatible for type lead!";
+                errors.add(new CsvErrorWrapper(filename, rowIndex, message, csvDto.toString()));
+                return expense;
+            }
+
             Lead lead = new Lead();
             lead.setCustomer(customer);
             lead.setManager(user);
-            lead.setEmployee(null);
+            lead.setEmployee(user);
             lead.setName(csvDto.getSubject_or_name());
             lead.setStatus(csvDto.getStatus());
 

@@ -88,7 +88,7 @@ public class GenericCsvService<T, E> {
                 BufferedReader br = new BufferedReader(isr)
         ) {
             if (file.isEmpty()) {
-                throw new CsvValidationException("File vide rangah", null);
+                throw new CsvValidationException("The CSV File is empty.", null);
             }
 
             CsvToBean<T> csvToBean = new CsvToBeanBuilder<T>(br)
@@ -103,7 +103,7 @@ public class GenericCsvService<T, E> {
 
             List<CsvErrorWrapper> errors = validateBatch(uploads, filename);
             if (!errors.isEmpty()) {
-                throw new CsvValidationException("Validation misy erreur ralh", errors);
+                throw new CsvValidationException("The CSV file contains validation errors", errors);
             }
 
             return uploads;

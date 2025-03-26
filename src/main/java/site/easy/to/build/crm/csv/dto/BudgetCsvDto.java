@@ -18,14 +18,17 @@ public class BudgetCsvDto {
     private String budgetStr;
 
     @DecimalMin(value = "0.0", inclusive = false, message = "'budget' must be strictly sup to 0.0")
-    public double budget;
+    public Double budget;
 
     // Custom setter for budget to handle comma replacement
     public void setBudgetStr(String budget) {
-        if (budget.contains(",")) {
-            this.budget = Double.parseDouble(budget.replace(",", "."));
-        } else {
-            this.budget = Double.parseDouble(budget);
+        try {
+            if (budget.contains(",")) {
+                this.budget = Double.parseDouble(budget.replace(",", "."));
+            } else {
+                this.budget = Double.parseDouble(budget);
+            }
+        } catch (NumberFormatException ignored) {
         }
         this.budgetStr = budget;
     }
