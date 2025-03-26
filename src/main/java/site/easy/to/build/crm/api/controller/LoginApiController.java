@@ -57,13 +57,13 @@ public class LoginApiController {
             response.setEmail(user.getEmail());
             response.setRole(user.getRoles().get(0).getName());
 
-            return ResponseEntity.ok(new ApiOkResponse<>("Connexion ok!", response));
+            return ResponseEntity.ok(new ApiOkResponse<>("Connected successfully!", response));
 
         } catch (ApiServerException e) {
             response.setAuthenticated(false);
             response.setError(e.getMessage());
 
-            return new ResponseEntity<>(new ApiBadResponse<>("Connexion echoue!", response), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiBadResponse<>("Connection failed!", response), HttpStatus.BAD_REQUEST);
         }
     }
 
