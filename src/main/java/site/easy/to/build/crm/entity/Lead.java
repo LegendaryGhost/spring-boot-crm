@@ -70,7 +70,7 @@ public class Lead {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToOne(mappedBy = "lead")
+    @OneToOne(mappedBy = "lead", cascade = CascadeType.REMOVE)
     private Expense expense;
 
     @NotNull(message = "The amount cannot be null")

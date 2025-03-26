@@ -10,6 +10,8 @@ import site.easy.to.build.crm.api.dto.DashboardDTO;
 import site.easy.to.build.crm.entity.Expense;
 import site.easy.to.build.crm.service.budget.BudgetService;
 import site.easy.to.build.crm.service.budget.ExpenseService;
+import site.easy.to.build.crm.service.lead.LeadServiceImpl;
+import site.easy.to.build.crm.service.ticket.TicketServiceImpl;
 
 import java.util.List;
 
@@ -20,6 +22,8 @@ public class ExpenseApiController {
 
     private final ExpenseService expenseService;
     private final BudgetService budgetService;
+    private final TicketServiceImpl ticketServiceImpl;
+    private final LeadServiceImpl leadServiceImpl;
 
     @GetMapping("/dashboard")
     @JsonView({POV.Dashboard.class})
@@ -78,8 +82,17 @@ public class ExpenseApiController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> delete(@PathVariable(name = "id") int expenseId) {
         ApiResponse<?> response;
+        Integer ticketId = ticketServiceImpl.getTicketIdByExpenseId(expenseId);
+        Integer leadId = leadServiceImpl.getLeadIdByExpenseId(expenseId);
         expenseService.deleteById(expenseId);
+        if (ticketId != null) {
+            ticketServiceImpl.deleteById(ticketId);
+        }
+        if (leadId != null) {
+            leadServiceImpl.deleteBydId(leadId);
+        }
         response = new ApiOkResponse<>("Expense deleted", expenseId);
         return ResponseEntity.ok(response);
     }
+
 }

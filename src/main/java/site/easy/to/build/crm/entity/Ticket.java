@@ -57,7 +57,7 @@ public class Ticket {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToOne(mappedBy = "ticket")
+    @OneToOne(mappedBy = "ticket", cascade = CascadeType.REMOVE)
     private Expense expense;
 
     @NotNull(message = "The amount cannot be null")

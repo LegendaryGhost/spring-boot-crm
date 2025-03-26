@@ -40,12 +40,12 @@ public class Expense {
     @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "lead_id")
     @JsonView({POV.LeadExpense.class, POV.Expense.class})
     private Lead lead;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "ticket_id")
     @JsonView({POV.TicketExpense.class, POV.Expense.class})
     private Ticket ticket;

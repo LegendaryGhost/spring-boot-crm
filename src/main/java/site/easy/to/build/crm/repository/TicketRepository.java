@@ -2,6 +2,9 @@ package site.easy.to.build.crm.repository;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.entity.Ticket;
@@ -31,4 +34,12 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer> {
     long countByCustomerCustomerId(int customerId);
 
     void deleteAllByCustomer(Customer customer);
+
+    @Query(value = """
+        SELECT t.ticket_id FROM expenses e
+             INNER JOIN trigger_ticket t ON e.ticket_id = t.ticket_id
+        WHERE e.expense_id = :expenseId
+        LIMIT 1
+    """, nativeQuery = true)
+    Integer findTicketIdByExpenseId(@Param("expenseId")  int expenseId);
 }
