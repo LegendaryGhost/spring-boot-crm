@@ -1,3 +1,35 @@
+<style>
+    #warning-alert {
+        position: fixed;
+        top: auto;
+        left: auto;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 100;
+    }
+    #warning-alert button {
+        position: absolute;
+        right: 1rem;
+    }
+    #warning-alert button:active, #warning-alert button:focus, #warning-alert button:focus-visible {
+        border: none;
+    }
+</style>
 <footer class="footer">
     © 2023 CRM by <a href="https://github.com/wp-ahmed">Ahmed Samir</a>
 </footer>
+<div th:if="${warning}" id="warning-alert" class="alert alert-warning alert-dismissible fade show" role="alert">
+    <strong>
+        <i class="fas fa-exclamation-triangle"></i>
+        Warning!
+    </strong>
+    <span th:text="${warning}"></span>
+    <button type="button" class="btn-close border-0 bg-transparent" data-bs-dismiss="alert" aria-label="Close">X</button>
+</div>
+<script>
+    const warningAlert = document.getElementById('warning-alert');
+    const warningAlertButton = warningAlert.querySelector('button');
+    warningAlertButton.addEventListener('click', () => {
+        warningAlert.classList.remove('show');
+    });
+</script>

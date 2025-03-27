@@ -3,6 +3,7 @@ package site.easy.to.build.crm.service.lead;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import site.easy.to.build.crm.entity.Customer;
 import site.easy.to.build.crm.repository.LeadRepository;
 import site.easy.to.build.crm.entity.Lead;
@@ -70,6 +71,11 @@ public class LeadServiceImpl implements LeadService {
     }
 
     @Override
+    public List<Lead> findCustomerLeads(int customerId) {
+        return leadRepository.findByCustomerCustomerId(customerId);
+    }
+
+    @Override
     public List<Lead> getRecentLeads(int managerId, int limit) {
         Pageable pageable = PageRequest.of(0, limit);
         return leadRepository.findByManagerIdOrderByCreatedAtDesc(managerId, pageable);
@@ -94,4 +100,13 @@ public class LeadServiceImpl implements LeadService {
     public long countByCustomerId(int customerId) {
         return leadRepository.countByCustomerCustomerId(customerId);
     }
+
+    public Integer getLeadIdByExpenseId(int expenseId) {
+        return leadRepository.findLeadIdByExpenseId(expenseId);
+    }
+
+    public void deleteBydId(Integer leadId) {
+        leadRepository.deleteById(leadId);
+    }
+
 }

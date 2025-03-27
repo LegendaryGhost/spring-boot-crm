@@ -1,6 +1,8 @@
 package site.easy.to.build.crm.controller;
 
 import jakarta.persistence.EntityManager;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -11,10 +13,14 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.expression.Numbers;
 import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.entity.settings.TicketEmailSettings;
 import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
+import site.easy.to.build.crm.service.budget.BudgetService;
+import site.easy.to.build.crm.service.budget.ExpenseService;
 import site.easy.to.build.crm.service.customer.CustomerService;
 import site.easy.to.build.crm.service.settings.TicketEmailSettingsService;
 import site.easy.to.build.crm.service.ticket.TicketService;
@@ -41,11 +47,15 @@ public class TicketController {
     private final TicketEmailSettingsService ticketEmailSettingsService;
     private final GoogleGmailApiService googleGmailApiService;
     private final EntityManager entityManager;
+    private final ExpenseService expenseService;
+    private final BudgetService budgetService;
+
+    private final Numbers numbers = new Numbers(Locale.FRANCE);
 
 
     @Autowired
     public TicketController(TicketService ticketService, AuthenticationUtils authenticationUtils, UserService userService, CustomerService customerService,
-                            TicketEmailSettingsService ticketEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager) {
+                            TicketEmailSettingsService ticketEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager, ExpenseService expenseService, BudgetService budgetService) {
         this.ticketService = ticketService;
         this.authenticationUtils = authenticationUtils;
         this.userService = userService;
@@ -53,6 +63,8 @@ public class TicketController {
         this.ticketEmailSettingsService = ticketEmailSettingsService;
         this.googleGmailApiService = googleGmailApiService;
         this.entityManager = entityManager;
+        this.expenseService = expenseService;
+        this.budgetService = budgetService;
     }
 
     @GetMapping("/show-ticket/{id}")
@@ -98,6 +110,7 @@ public class TicketController {
         model.addAttribute("tickets",tickets);
         return "ticket/my-tickets";
     }
+
     @GetMapping("/create-ticket")
     public String showTicketCreationForm(Model model, Authentication authentication) {
         int userId = authenticationUtils.getLoggedInUserId(authentication);
@@ -123,9 +136,9 @@ public class TicketController {
     }
 
     @PostMapping("/create-ticket")
-    public String createTicket(@ModelAttribute("ticket") @Validated Ticket ticket, BindingResult bindingResult, @RequestParam("customerId") int customerId,
-                               @RequestParam Map<String, String> formParams, Model model,
-                               @RequestParam("employeeId") int employeeId, Authentication authentication) {
+    public String createTicket(@ModelAttribute("ticket") @Validated Ticket ticket, BindingResult bindingResult,
+                               @RequestParam("customerId") int customerId, Model model,
+                               @RequestParam("employeeId") int employeeId, Authentication authentication, RedirectAttributes redirectAttributes) {
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User manager = userService.findById(userId);
@@ -164,12 +177,50 @@ public class TicketController {
             }
         }
 
+        if (ticket.getConfirm() == null && budgetService.isBudgetExceeded(customerId, ticket.getAmount())) {
+            ticket.setEmployee(employee);
+            ticket.setManager(manager);
+            ticket.setCustomer(customer);
+
+            List<User> employees = new ArrayList<>();
+            List<Customer> customers;
+
+            if(AuthorizationUtil.hasRole(authentication, "ROLE_MANAGER")) {
+                employees = userService.findAll();
+                customers = customerService.findAll();
+            } else {
+                employees.add(manager);
+                customers = customerService.findByUserId(manager.getId());
+            }
+
+            double totalCustomerBudget = budgetService.findTotalBudgetByCustomerId(customerId);
+
+            model.addAttribute("ticket", ticket);
+            model.addAttribute("employees",employees);
+            model.addAttribute("customers",customers);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(totalCustomerBudget, 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
+            return "ticket/create-ticket";
+        }
+
         ticket.setCustomer(customer);
         ticket.setManager(manager);
         ticket.setEmployee(employee);
         ticket.setCreatedAt(LocalDateTime.now());
 
-        ticketService.save(ticket);
+        ticket = ticketService.save(ticket);
+
+        if (ticket.getAmount() > 0) {
+            Expense expense = new Expense(
+                    ticket.getAmount(),
+                    ticket.getSubject(),
+                    ticket
+            );
+            expenseService.save(expense);
+        }
+
+        budgetService.warnIfThresholdReached(redirectAttributes, customerId);
 
         return "redirect:/employee/ticket/assigned-tickets";
     }
@@ -209,6 +260,8 @@ public class TicketController {
             }
         }
 
+        ticket.setAmount(ticket.getExpense() == null ? 0 : ticket.getExpense().getAmount());
+
         model.addAttribute("employees",employees);
         model.addAttribute("customers",customers);
         model.addAttribute("ticket", ticket);
@@ -218,7 +271,7 @@ public class TicketController {
     @PostMapping("/update-ticket")
     public String updateTicket(@ModelAttribute("ticket") @Validated Ticket ticket, BindingResult bindingResult,
                                @RequestParam("customerId") int customerId, @RequestParam("employeeId") int employeeId,
-                               Authentication authentication, Model model) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+                               Authentication authentication, Model model, RedirectAttributes redirectAttributes) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User loggedInUser = userService.findById(userId);
@@ -281,10 +334,62 @@ public class TicketController {
             return "error/500";
         }
 
+        if (ticket.getConfirm() == null && budgetService.isBudgetExceeded(customerId, ticket.getAmount())) {
+            ticket.setEmployee(employee);
+            ticket.setManager(manager);
+            ticket.setCustomer(customer);
+
+            List<User> employees = new ArrayList<>();
+            List<Customer> customers = new ArrayList<>();
+
+            if(AuthorizationUtil.hasRole(authentication, "ROLE_MANAGER")) {
+                employees = userService.findAll();
+                customers = customerService.findAll();
+            } else {
+                employees.add(loggedInUser);
+                //In case Employee's manager assign lead for the employee with a customer that's not created by this employee
+                //As a result of that the employee mustn't change the customer
+                if(!Objects.equals(employee.getId(), ticket.getManager().getId())) {
+                    customers.add(ticket.getCustomer());
+                } else {
+                    customers = customerService.findByUserId(loggedInUser.getId());
+                }
+            }
+
+            double totalCustomerBudget = budgetService.findTotalBudgetByCustomerId(customerId);
+
+            model.addAttribute("ticket", ticket);
+            model.addAttribute("employees",employees);
+            model.addAttribute("customers",customers);
+            model.addAttribute("confirm",
+                    "The budget limit " + numbers.formatDecimal(totalCustomerBudget, 1, "COMMA", 2, "POINT") + " will be exceeded if you confirm this expense."
+            );
+            return "ticket/update-ticket";
+        }
+
         ticket.setCustomer(customer);
         ticket.setManager(manager);
         ticket.setEmployee(employee);
         Ticket currentTicket = ticketService.save(ticket);
+
+        Expense expense = expenseService.findByTicketId(ticket.getTicketId());
+        if (ticket.getAmount() > 0) {
+            if (expense == null) {
+                expense = new Expense(
+                        ticket.getAmount(),
+                        ticket.getSubject(),
+                        ticket
+                );
+            } else {
+                expense.setAmount(ticket.getAmount());
+            }
+            expenseService.save(expense);
+        } else if (ticket.getAmount() == 0 && expense != null) {
+            expense.setAmount(ticket.getAmount());
+            expenseService.save(expense);
+        }
+
+        budgetService.warnIfThresholdReached(redirectAttributes, customerId);
 
         List<String> properties = DatabaseUtil.getColumnNames(entityManager, Ticket.class);
         Map<String, Pair<String,String>> changes = LogEntityChanges.trackChanges(originalTicket,currentTicket,properties);
