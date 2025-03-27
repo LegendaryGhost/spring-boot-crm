@@ -57,7 +57,7 @@ public class DuplicationService {
     }
 
     private String getBudgetCsvString(Budget budget) {
-        return "\"budget\",\"" + budget.getName() + "\"," + budget.getAmount() + ",\"none\"";
+        return "\"budget\",\"" + budget.getName() + "\"," + budget.getAmount() + ",\"none\",\"none\"";
     }
 
     private String getCustomerCsvString(Customer customer) {

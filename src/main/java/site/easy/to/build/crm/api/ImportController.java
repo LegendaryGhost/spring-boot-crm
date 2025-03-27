@@ -13,11 +13,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/import")
 public class ImportController {
 
-    @PostMapping
+    @PostMapping("/customer")
     public ResponseEntity<?> importCustomer(@RequestParam("file") MultipartFile file) {
         System.out.println(file.getOriginalFilename());
         System.out.println(file.getContentType());
         System.out.println(file.getSize());
+
+        
+
         return ResponseEntity.ok().build();
     }
 
