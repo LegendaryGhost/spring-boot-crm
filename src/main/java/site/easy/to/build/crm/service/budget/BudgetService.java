@@ -149,8 +149,6 @@ public class BudgetService {
         Budget budget = new Budget();
         budget.setAmount(csvDto.getBudget());
 
-        double amount = csvDto.getBudget();
-
         Customer customer = customerRepository.findByEmail(csvDto.getCustomer_email());
         if (customer == null) {
             String msg = "Customer '" + csvDto.getCustomer_email() + "' not found!";
@@ -158,20 +156,6 @@ public class BudgetService {
             return null;
         }
         budget.setCustomer(customer);
-
-//        BudgetTotal bt = budgetTotalRepository.findByCustomerId(customer.getCustomerId()).orElse(null);
-//        if (bt == null) {
-//            bt = new BudgetTotal();
-//            bt.setCustomer(customer);
-//            bt.setAmountTotal(amount);
-//            bt.setAmountRemain(amount);
-//        } else {
-//            double oldRemain = bt.getAmountRemain(),
-//                    oldTotal = bt.getAmountTotal();
-//            bt.setAmountTotal(oldTotal + amount);
-//            bt.setAmountRemain(oldRemain + amount);
-//        }
-//        budgetTotalRepository.save(bt);
 
         return budget;
     }
