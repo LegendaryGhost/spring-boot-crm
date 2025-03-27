@@ -91,6 +91,13 @@ public class BudgetService {
         budgetRepository.deleteById(budgetId);
     }
 
+    public Budget updateAmountById(Integer budgetId, double newAmount) {
+        Budget budget = findById(budgetId);
+        budget.setAmount(newAmount);
+        return budgetRepository.save(budget);
+    }
+
+    // batch
     @Transactional
     public void saveBatch(List<Budget> budgets, Integer batchSize) {
         String sql = "INSERT INTO budgets (created_at, amount, customer_id) VALUES (?, ?, ?)";
@@ -142,8 +149,6 @@ public class BudgetService {
         Budget budget = new Budget();
         budget.setAmount(csvDto.getBudget());
 
-        double amount = csvDto.getBudget();
-
         Customer customer = customerRepository.findByEmail(csvDto.getCustomer_email());
         if (customer == null) {
             String msg = "Customer '" + csvDto.getCustomer_email() + "' not found!";
@@ -151,20 +156,6 @@ public class BudgetService {
             return null;
         }
         budget.setCustomer(customer);
-
-//        BudgetTotal bt = budgetTotalRepository.findByCustomerId(customer.getCustomerId()).orElse(null);
-//        if (bt == null) {
-//            bt = new BudgetTotal();
-//            bt.setCustomer(customer);
-//            bt.setAmountTotal(amount);
-//            bt.setAmountRemain(amount);
-//        } else {
-//            double oldRemain = bt.getAmountRemain(),
-//                    oldTotal = bt.getAmountTotal();
-//            bt.setAmountTotal(oldTotal + amount);
-//            bt.setAmountRemain(oldRemain + amount);
-//        }
-//        budgetTotalRepository.save(bt);
 
         return budget;
     }

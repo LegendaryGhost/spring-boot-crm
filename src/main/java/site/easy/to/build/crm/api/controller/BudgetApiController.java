@@ -25,6 +25,23 @@ public class BudgetApiController {
         return budgetService.findAll();
     }
 
+    @GetMapping("/{id}")
+    @JsonView(POV.Budget.class)
+    public Budget findById(@PathVariable("id") Integer id) {
+        return budgetService.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    @JsonView(POV.Budget.class)
+    public ResponseEntity<ApiResponse<?>> updateBudget(
+            @PathVariable(name = "id") Integer budgetId,
+            @RequestParam(name = "newAmount") double newAmount
+    ) {
+        Budget budget = budgetService.updateAmountById(budgetId, newAmount);
+        ApiResponse<Budget> response = new ApiOkResponse<>("Budget amount updated", budget);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> delete(@PathVariable(name = "id") int budgetId) {
         budgetService.deleteById(budgetId);
